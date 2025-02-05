@@ -11,21 +11,24 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5v6$=07*fg8)2^77!0-qmo%2bv403fdp_z6%_qp2f#un_0vd5k'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.2', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -38,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    'api',
     'goldLoan',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -51,7 +56,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8081"
+# ]
+
+CORS_ALLOWED_ORIGINS = True
+
 ROOT_URLCONF = 'ponnudurai.urls'
+
+#AUTH_USER_MODEL = "ponnudurai.Users"
 
 TEMPLATES = [
     {
@@ -118,8 +131,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# RAZORPAY_KEY_ID = getenv("RAZORPAY_KEY_ID")
+# RAZORPAY_KEY_SECRET = getenv("RAZORPAY_KEY_SECRET")
