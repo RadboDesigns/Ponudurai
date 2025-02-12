@@ -1,12 +1,14 @@
 import { Link, router } from "expo-router";
-import { Text, View, Image, TouchableOpacity, Animated, ScrollView } from "react-native";
+import { Text, View, Image, TouchableOpacity, Animated, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons } from "@/constants/icons";
 import image from "@/constants/images";
 import React, { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 
-const BACKEND_URL = 'http://127.0.0.1:8000/live_prices/';
+import { BACKEND_URL, API_CONFIG } from '@/config/DjangoConfig';
+import { Platform } from 'react-native';
+
 
 interface PriceData {
   gold_price: number;
@@ -27,26 +29,35 @@ export default function Index() {
 
   const fetchPrices = async () => {
     try {
-      const response = await fetch(BACKEND_URL, {
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}${API_CONFIG.ENDPOINTS.LIVE_PRICES}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
       const data = await response.json();
       setPriceData(data);
       setLastUpdated(format(new Date(), "hh:mm a dd-MMM-yyyy"));
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching prices:', error);
+      Alert.alert(
+        'Error',
+        'Unable to fetch latest prices. Please check your connection and try again.'
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchPrices();
-    // Fetch prices every 5 minutes
-    const interval = setInterval(fetchPrices, 5 * 60 * 1000);
+    const interval = setInterval(fetchPrices, API_CONFIG.REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, []);
 
@@ -57,11 +68,11 @@ export default function Index() {
   const progress = 0.5;
 
   const handleMySchemePress = () => {
-    router.push("/mySchemes");
+    router.push("/(root)/properties/mySchemes");
   };
 
   const handleJoinSchemePress = () => {
-    router.push("/joinSchemes");
+    router.push("/(root)/properties/joinSchemes");
   };
 
   const paymentPage = () => {
@@ -73,7 +84,7 @@ export default function Index() {
   };
 
   const privacyPolicy = () => {
-    router.push("/Privacy");
+    router.push("/(root)/properties/Privacy");
   };
 
   const toggleMenu = () => {
@@ -423,8 +434,8 @@ export default function Index() {
             </View>
           </View>
 
-          <Link
-            href={"/sign-in"}
+          {/* <Link
+            href={"/(root)/properties/sign-in"}
             className="bg-primary-100 px-8 py-3 rounded-full mb-4 w-full mt-10"
           >
             <Text className="text-white text-center font-rubik-medium text-lg">
@@ -439,7 +450,7 @@ export default function Index() {
             <Text className="text-white text-center font-rubik-medium text-lg">
               Sign Up
             </Text>
-          </Link>
+          </Link> */}
 
           <View className="mt-8">
             <Link

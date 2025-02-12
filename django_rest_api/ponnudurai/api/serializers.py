@@ -37,3 +37,4 @@ class FeedSerializers(serializers.ModelSerializer):
     class Meta:
         model = Feeds
         fields = ('feedsTitle', 'image', 'context', 'created_at', 'joiningDate')
+

@@ -28,8 +28,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['192.168.1.2', 'localhost', '127.0.0.1']
-
 
 # Application definition
 
@@ -44,9 +42,12 @@ INSTALLED_APPS = [
     'api',
     'goldLoan',
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,7 +61,9 @@ MIDDLEWARE = [
 #     "http://localhost:8081"
 # ]
 
-CORS_ALLOWED_ORIGINS = True
+# For development only - adjust for production
+CORS_ALLOW_ALL_ORIGINS = True
+ALLOWED_HOSTS = ['*']
 
 ROOT_URLCONF = 'ponnudurai.urls'
 
@@ -133,7 +136,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

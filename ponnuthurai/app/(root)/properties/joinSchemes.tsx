@@ -19,7 +19,7 @@ const JoinSchemes = () => {
     const handleSchemePress = (schemeType: string) => {
         // Navigate to the respective scheme page
         router.push({
-            pathname: "/schemes", // Assuming you have a schemes.tsx file in your app directory
+            pathname: "/(root)/properties/schemes", // Assuming you have a schemes.tsx file in your app directory
             params: {
                 type: schemeType.toLowerCase(),
             }

@@ -3,7 +3,7 @@ from .models import *
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'phone')
+    list_display = ('id', 'email')
 
 @admin.register(JoinScheme)
 class JoinSchemeAdmin(admin.ModelAdmin):
@@ -19,3 +19,7 @@ class LivePriceAdmin(admin.ModelAdmin):
     list_display = ('gold_price', 'silver_price', 'timestamp')  # Fixed tuple syntax
     list_filter = ('timestamp',)
     readonly_fields = ('timestamp',)
+
+@admin.register(Payment)
+class SchemePaymentAdmin(admin.ModelAdmin):
+    list_display = ('schemeCode','amountPaid', 'goldAdded')
