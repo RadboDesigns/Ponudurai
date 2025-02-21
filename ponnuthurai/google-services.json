@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "5749737863",
+    "project_id": "ponnudurai-f909f",
+    "storage_bucket": "ponnudurai-f909f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5749737863:android:a4fa1b858f7a0bbe116b22",
+        "android_client_info": {
+          "package_name": "com.thiyalan.ponnuthurai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyXsD-r3RCYt8XkTeKLzwNCJEknvTUW10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

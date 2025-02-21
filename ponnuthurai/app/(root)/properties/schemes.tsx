@@ -3,83 +3,116 @@ import React, { useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { icons } from "@/constants/icons";
 import { router } from "expo-router";
+import { BACKEND_URL } from '@/config/DjangoConfig';
 
 const Schemes = () => {
   const { type } = useLocalSearchParams();
   const [joinerName, setJoinerName] = useState('');
+  const [amount, setAmount] = useState('');
   const [isChecked, setIsChecked] = useState(false);
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!isChecked) {
       Alert.alert('Error', 'Please agree to the terms and conditions to join');
       return;
     }
-    // Handle join logic here
-    Alert.alert('Success', 'Successfully joined the scheme!');
-  };
   
+    if (!joinerName || !amount) {
+      Alert.alert('Error', 'Please enter your name and the amount');
+      return;
+    }
+  
+    const amountNumber = parseFloat(amount);
+    if (isNaN(amountNumber) || amountNumber <= 500) {
+      Alert.alert('Error', 'Amount must be greater than ₹500');
+      return;
+    }
+  
+    // Prepare data to send to the backend
+    const joinData = {
+      Name: joinerName,
+      payAmount: amountNumber,
+      chosenPackage: type, // Assuming `type` is passed from the previous screen
+      phone: '1234567890', // Replace with the actual user's phone number (from AsyncStorage or context)
+    };
+  
+    try {
+      // Send data to the backend
+      const response = await fetch(`${BACKEND_URL}/join_scheme/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(joinData),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to join the scheme');
+      }
+  
+      const responseData = await response.json();
+      Alert.alert('Success', 'You have successfully joined the scheme!');
+      router.replace('/(root)/(tabs)'); // Redirect to the index page
+    } catch (error: any) {
+      console.error('Join Scheme Error:', error);
+      Alert.alert('Error', error.message || 'Failed to join the scheme. Please try again.');
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
-        <View className="w-full h-[100px] bg-primary-100 justify-end pb-4">
-            <View className="flex-row items-center px-4">
-                <TouchableOpacity onPress={handleBack} className="absolute left-4 z-10">
-                    <Image 
-                        source={icons.backArrow}
-                        className="w-6 h-6"
-                        tintColor="white"
-                        resizeMode="contain"
-                    />
-                </TouchableOpacity>
-                <Text className="flex-1 text-white text-2xl font-rubik-medium text-center">
-                    Join Schemes
-                </Text>
-            </View>
+      <View className="w-full h-[100px] bg-primary-100 justify-end pb-4">
+        <View className="flex-row items-center px-4">
+          <TouchableOpacity onPress={handleBack} className="absolute left-4 z-10">
+            <Image 
+              source={icons.backArrow}
+              className="w-6 h-6"
+              tintColor="white"
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+          <Text className="flex-1 text-white text-2xl font-rubik-medium text-center">
+            Join Schemes
+          </Text>
         </View>
+      </View>
 
-        <ScrollView className="flex-1 mb-[319]">
-          <View className="mt-6 mx-4 pb-6">
-            <View className="w-[370] h-[157] bg-primary-200 rounded-lg p-4">
-              {/* Title */}
-              <Text className="text-xl font-rubik-medium text-primary-100 mb-4">
-                Ponnudurai - {type}
+      <ScrollView className="flex-1 mb-[319]">
+        <View className="mt-6 mx-4 pb-6">
+          <View className="w-[370] h-[157] bg-primary-200 rounded-lg p-4">
+            <Text className="text-xl font-rubik-medium text-primary-100 mb-4">
+              Ponnudurai - {type}
+            </Text>
+            <View className="w-full h-[1px] bg-primary-100 mb-4" />
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-base font-rubik text-gray-700">
+                Minimum Amount Payable
               </Text>
-              
-              {/* Divider Line */}
-              <View className="w-full h-[1px] bg-primary-100 mb-4" />
-              
-              {/* Amount Row */}
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-base font-rubik text-gray-700">
-                  Minimum Amount Payable
-                </Text>
-                <Text className="text-base font-rubik-medium text-primary-100">
-                  ₹500
-                </Text>
-              </View>
-              
-              {/* Duration Row */}
-              <View className="flex-row justify-between items-center">
-                <Text className="text-base font-rubik text-gray-700">
-                  Duration
-                </Text>
-                <Text className="text-base font-rubik-medium text-primary-100">
-                  {type}
-                </Text>
-              </View>
+              <Text className="text-base font-rubik-medium text-primary-100">
+                ₹500
+              </Text>
             </View>
-
-            {/* Tamil Title */}
-            <View className="mt-6">
-              <Text className="text-[22px] font-rubik-bold text-primary-100 mb-4">
-                விதிமுறைகள்
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base font-rubik text-gray-700">
+                Duration
               </Text>
-              
-              {/* Points */}
-              <View className="space-y-2">
+              <Text className="text-base font-rubik-medium text-primary-100">
+                {type}
+              </Text>
+            </View>
+          </View>
+
+          {/* Terms and Conditions */}
+          <View className="mt-6">
+            <Text className="text-[22px] font-rubik-bold text-primary-100 mb-4">
+              விதிமுறைகள்
+            </Text>
+            <View className="space-y-2">
                 <Text className="text-base font-rubik text-gray-700 ml-3">
                   1. எங்களுடைய பொன்னுத்துரை சேமிப்பு திட்டத்தில் நீங்கள் செலுத்தும் தொகை, அன்றைய சந்தை நிலவரத்தின் அடிப்படையில் 916 தங்கம் எடையாக சேமிக்கப்படும்.
                 </Text>
@@ -130,55 +163,56 @@ const Schemes = () => {
                 Terms & Conditions are subject to administration
                 </Text>
               </View>
-            </View>
           </View>
-        </ScrollView>
+        </View>
+      </ScrollView>
 
-        {/* Fixed Join Form at Bottom */}
-        <View className="absolute bottom-0 w-full h-[280] bg-white border-t border-gray-200 p-4">
-          <Text className="text-base font-rubik-medium text-gray-800 mb-2">
-            Joiner's Name
-          </Text>
-          <TextInput
-            className="w-full h-12 border border-gray-300 rounded-lg px-4 mb-2"
-            placeholder="Enter your name"
-            value={joinerName}
-            onChangeText={setJoinerName}
-          />
+      {/* Fixed Join Form at Bottom */}
+      <View className="absolute bottom-0 w-full h-[280] bg-white border-t border-gray-200 p-4">
+        <Text className="text-base font-rubik-medium text-gray-800 mb-2">
+          Joiner's Name
+        </Text>
+        <TextInput
+          className="w-full h-12 border border-gray-300 rounded-lg px-4 mb-2"
+          placeholder="Enter your name"
+          value={joinerName}
+          onChangeText={setJoinerName}
+        />
 
         <Text className="text-base font-rubik-medium text-gray-800 mb-2">
-            Enter Scheme Amount
-          </Text>
-          <TextInput
-            className="w-full h-12 border border-gray-300 rounded-lg px-4 mb-2"
-            placeholder="Enter your name"
-            value={joinerName}
-            onChangeText={setJoinerName}
-          />
-          
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-base font-rubik text-gray-700">
-              Agree Terms & Conditions
-            </Text>
-            <TouchableOpacity 
-              onPress={() => setIsChecked(!isChecked)}
-              className="w-6 h-6 border border-gray-400 rounded justify-center items-center"
-            >
-              {isChecked && (
-                <View className="w-4 h-4 bg-primary-100 rounded" />
-              )}
-            </TouchableOpacity>
-          </View>
+          Enter Scheme Amount
+        </Text>
+        <TextInput
+          className="w-full h-12 border border-gray-300 rounded-lg px-4 mb-2"
+          placeholder="Enter amount (₹)"
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="numeric"
+        />
 
-          <TouchableOpacity
-            onPress={handleJoin}
-            className="w-full h-12 bg-primary-100 rounded-lg justify-center items-center"
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-base font-rubik text-gray-700">
+            Agree Terms & Conditions
+          </Text>
+          <TouchableOpacity 
+            onPress={() => setIsChecked(!isChecked)}
+            className="w-6 h-6 border border-gray-400 rounded justify-center items-center"
           >
-            <Text className="text-white text-lg font-rubik-medium">
-              Join
-            </Text>
+            {isChecked && (
+              <View className="w-4 h-4 bg-primary-100 rounded" />
+            )}
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onPress={handleJoin}
+          className="w-full h-12 bg-primary-100 rounded-lg justify-center items-center"
+        >
+          <Text className="text-white text-lg font-rubik-medium">
+            Join
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

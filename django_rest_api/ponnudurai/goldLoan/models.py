@@ -1,15 +1,43 @@
 from django.db import models
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models import F
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
+from django.db import models
 
-class User(models.Model):
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
+class User(AbstractUser):
+    phone_regex = RegexValidator(
+        regex=r'^\d{10}$',
+        message="Phone number must be entered in the format: '9999999999'. Up to 10 digits allowed."
+    )
+    phone_number = models.CharField(
+        max_length=15, 
+        unique=True,
+        validators=[phone_regex]
+    )
+    # Override the ManyToManyField relationships with custom related_names
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        related_name='custom_user_set',
+        related_query_name='custom_user'
+    )
     
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        related_name='custom_user_set',
+        related_query_name='custom_user'
+    )
     
+    class Meta:
+        unique_together = ('id', 'phone_number')
+        
     def __str__(self):
-        return self.email
+        return f"{self.username} - {self.phone_number}"
     
 
 class LivePrice(models.Model):

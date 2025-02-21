@@ -62,12 +62,18 @@ MIDDLEWARE = [
 # ]
 
 # For development only - adjust for production
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:19006",
+    "http://localhost:19000",
+     "http://localhost:8081",
+    "exp://192.168.1.2:19000"  # Add your Expo development server
+]
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = ['*']
 
 ROOT_URLCONF = 'ponnudurai.urls'
 
-#AUTH_USER_MODEL = "ponnudurai.Users"
+AUTH_USER_MODEL = "goldLoan.User"
 
 TEMPLATES = [
     {

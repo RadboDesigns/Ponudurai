@@ -3,7 +3,7 @@ from .models import *
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'email')
+    list_display = ('id', 'email', 'phone_number')
 
 @admin.register(JoinScheme)
 class JoinSchemeAdmin(admin.ModelAdmin):

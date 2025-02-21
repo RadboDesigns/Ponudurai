@@ -1,171 +1,189 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Image, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { auth } from '@/config/FirebaseConfig';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
-} from 'firebase/auth';
+import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import images from '@/constants/images';
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import { BACKEND_URL } from '@/config/DjangoConfig';
 
-// Function to generate a 6-digit OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+// Function to check for existing user in backend
+const checkExistingUserInBackend = async (phoneNumber: string) => {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/check-user/?phone=${encodeURIComponent(phoneNumber)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) throw new Error('Failed to check user existence');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('User check error:', error);
+    return { phone_exists: false };
+  }
 };
 
 // Function to save user to Django backend
-const saveUserToBackend = async (email: string, password: string) => {
+const saveUserToBackend = async (userData: {
+  email: string;
+  password: string;
+  phoneNumber: string;
+  firebaseUid: string;
+}) => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/user/', {
+    const response = await fetch(`${BACKEND_URL}/user/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        email,
-        password
+      body: JSON.stringify({
+        email: userData.email,
+        password: userData.password,
+        phone_number: userData.phoneNumber,
+        firebase_uid: userData.firebaseUid,
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to save user');
+      const errorData = await response.json();
+      throw new Error(
+        errorData.detail ||
+        errorData.phone_number?.[0] ||
+        'Validation error'
+      );
     }
 
     return await response.json();
   } catch (error) {
-    throw new Error('Failed to save user to backend');
+    console.error('Backend save error:', error);
+    throw error;
   }
+};
+
+const defaultRecaptchaProps = {
+  title: "Prove you're human",
+  cancelLabel: "Close",
+  languageCode: "en"
 };
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [enteredOTP, setEnteredOTP] = useState('');
-  const [generatedOTP, setGeneratedOTP] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationId, setVerificationId] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const router = useRouter();
+  const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
 
-  const showNotification = (message: string) => {
-    Alert.alert('Notice', message);
+  const handleLogin = () => {
+    router.push('/sign-in');
   };
 
-  const checkExistingAccount = async (email: string) => {
-    try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      return methods.length > 0;
-    } catch (error) {
-      console.error('Error checking email:', error);
-      return false;
-    }
+  const validatePhoneNumber = (phone: string) => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
   };
 
-  const handleSignUp = async () => {
+  const sendOTP = async () => {
     try {
-      if (!email || !password) {
-        showNotification('Please enter both email and password');
+      if (!validatePhoneNumber(phoneNumber)) {
+        Alert.alert('Error', 'Please enter a valid 10-digit phone number');
         return;
       }
 
       setLoading(true);
 
-      // Check if account already exists
-      const exists = await checkExistingAccount(email);
-      if (exists) {
-        showNotification('An account with this email already exists. Please login instead.');
+      // Check if user exists in backend
+      const existingUser = await checkExistingUserInBackend(phoneNumber);
+      if (existingUser.phone_exists) {
+        Alert.alert('Error', 'An account with this phone number already exists');
+        setLoading(false);
         return;
       }
 
-      // Generate and store OTP
-      const otp = generateOTP();
-      setGeneratedOTP(otp);
-      
-      // Here you would typically send the OTP to the user's email
-      // For development, we'll show it in a notification
-      showNotification(`Development OTP: ${otp}`);
-      
-      // Show OTP modal
-      setShowOtpModal(true);
+      // Initialize Firebase phone auth
+      const phoneProvider = new PhoneAuthProvider(auth);
+      const formattedPhoneNumber = `+91${phoneNumber}`; // Add country code for India
 
+      if (!recaptchaVerifier.current) {
+        throw new Error('Recaptcha verifier not initialized');
+      }
+
+      const verificationId = await phoneProvider.verifyPhoneNumber(
+        formattedPhoneNumber,
+        recaptchaVerifier.current
+      );
+
+      setVerificationId(verificationId);
+      setShowOtpModal(true);
+      Alert.alert('Success', 'OTP has been sent to your phone number');
     } catch (error: any) {
-      console.error('Sign Up Error:', error);
-      showNotification(error.message || 'Failed to register. Please try again later.');
+      console.error('Error sending OTP:', error);
+      Alert.alert('Error', error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
   };
 
   const verifyOTP = async () => {
-    try {
-      if (!enteredOTP) {
-        showNotification('Please enter the OTP');
-        return;
-      }
-
-      setLoading(true);
-
-      if (enteredOTP === generatedOTP) {
-        // Create user in Firebase
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-        // Save user to Django backend after successful OTP verification
-        await saveUserToBackend(email, password);
-
-        await AsyncStorage.setItem('lastActiveTimestamp', Date.now().toString());
-        showNotification('Account created successfully!');
-        setShowOtpModal(false);
-        router.replace('/(root)/(tabs)');
-      } else {
-        showNotification('Invalid OTP. Please try again.');
-      }
-    } catch (error: any) {
-      console.error('OTP Verification Error:', error);
-      showNotification('Failed to verify OTP. Please try again.');
-    } finally {
-      setLoading(false);
+    if (!verificationCode) {
+      Alert.alert('Error', 'Please enter the OTP');
+      return;
     }
-  };
 
-  const resendOTP = async () => {
     try {
       setLoading(true);
-      const newOTP = generateOTP();
-      setGeneratedOTP(newOTP);
-      // For development, show OTP in notification
-      showNotification(`Development OTP: ${newOTP}`);
-    } catch (error) {
-      console.error('Resend OTP Error:', error);
-      showNotification('Failed to resend OTP.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleLogin = async () => {
-    try {
-      if (!email || !password) {
-        showNotification('Please enter both email and password');
-        return;
-      }
+      const credential = PhoneAuthProvider.credential(
+        verificationId,
+        verificationCode
+      );
 
-      setLoading(true);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
 
-      await AsyncStorage.setItem('lastActiveTimestamp', Date.now().toString());
-      showNotification('Login successful!');
-      router.replace('/(root)/(tabs)');
+      await saveUserToBackend({
+        email,
+        password,
+        phoneNumber,
+        firebaseUid: user.uid,
+      });
+
+      await AsyncStorage.setItem('userPhoneNumber', phoneNumber);
+
+      Alert.alert('Success', 'Registration successful!', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/')
+        }
+      ]);
     } catch (error: any) {
-      console.error('Login Error:', error);
-      showNotification('Failed to login. Please check your credentials.');
+      console.error('Verification error:', error);
+      Alert.alert('Error', error.message || 'OTP verification failed');
     } finally {
       setLoading(false);
+      setShowOtpModal(false);
     }
   };
 
   return (
     <ScrollView className="bg-white flex-1">
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={auth.app.options}
+        attemptInvisibleVerification={false}
+        {...defaultRecaptchaProps}
+      />
+
       <View className="items-center">
         <Image
           source={images.onboarding}
@@ -205,15 +223,26 @@ export default function SignUp() {
               autoCapitalize="none"
             />
           </View>
+
+          <View className="flex-row items-center border border-gray-300 rounded-lg mb-4">
+            <TextInput
+              className="flex-1 p-4"
+              placeholder="Enter your phone number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+              maxLength={10}
+            />
+          </View>
         </View>
 
         <TouchableOpacity
           className="bg-blue-500 rounded-lg p-4 mb-4"
-          onPress={handleSignUp}
+          onPress={sendOTP}
           disabled={loading}
         >
           <Text className="text-white text-center font-bold">
-            {loading ? 'Processing...' : 'Sign Up'}
+            {loading ? 'Sending OTP...' : 'Send OTP'}
           </Text>
         </TouchableOpacity>
 
@@ -223,53 +252,37 @@ export default function SignUp() {
           disabled={loading}
         >
           <Text className="text-white text-center font-bold">
-            {loading ? 'Processing...' : 'Login'}
+            Already have an account? Login
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* OTP Verification Modal */}
       <Modal
         visible={showOtpModal}
         transparent={true}
         animationType="slide"
+        onRequestClose={() => setShowOtpModal(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-6 rounded-lg w-[80%]">
-            <Text className="text-lg font-rubik-medium text-center mb-4">
+          <View className="bg-white p-6 rounded-lg w-80">
+            <Text className="text-center font-rubik text-primary-100 text-xl mb-4">
               Enter OTP
             </Text>
-            
-            <Text className="text-sm text-gray-600 text-center mb-4">
-              Please enter the 6-digit code sent to your email
-            </Text>
-            
             <TextInput
               className="border border-gray-300 rounded-lg p-4 mb-4"
-              placeholder="Enter 6-digit OTP"
-              value={enteredOTP}
-              onChangeText={setEnteredOTP}
-              keyboardType="numeric"
+              placeholder="Enter OTP"
+              value={verificationCode}
+              onChangeText={setVerificationCode}
+              keyboardType="number-pad"
               maxLength={6}
             />
-
             <TouchableOpacity
-              className="bg-blue-500 rounded-lg p-4 mb-2"
+              className="bg-blue-500 rounded-lg p-4"
               onPress={verifyOTP}
               disabled={loading}
             >
               <Text className="text-white text-center font-bold">
                 {loading ? 'Verifying...' : 'Verify OTP'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-gray-500 rounded-lg p-4 mb-2"
-              onPress={resendOTP}
-              disabled={loading}
-            >
-              <Text className="text-white text-center font-bold">
-                Resend OTP
               </Text>
             </TouchableOpacity>
           </View>

@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 
 import { BACKEND_URL, API_CONFIG } from '@/config/DjangoConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 
@@ -16,16 +17,56 @@ interface PriceData {
   timestamp?: string;
 }
 
+interface SchemeData {
+  scheme_name: string;
+  installment_months: number;
+  scheme_type: string;
+  close_date: string;
+  total_savings: number;
+  remaining_months: number;
+}
+
 export default function Index() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(-300)).current;
+  const [userSchemes, setUserSchemes] = useState<SchemeData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [priceData, setPriceData] = useState<PriceData>({
     gold_price: 0,
     silver_price: 0,
   });
   const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+
+  const fetchUserSchemes = async () => {
+    try {
+      const phoneNumber = await AsyncStorage.getItem('userPhoneNumber');
+      if (phoneNumber) {
+        const response = await fetch(
+          `${BACKEND_URL}/schemes/?phone=${encodeURIComponent(phoneNumber)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          setUserSchemes(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching schemes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserSchemes();
+  }, []);
 
   const fetchPrices = async () => {
     try {
@@ -96,6 +137,75 @@ export default function Index() {
     }).start();
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const renderScheme = (scheme: SchemeData) => (
+    <View key={scheme.scheme_name} className="mt-6 bg-white rounded-lg shadow-lg border border-gray-200 w-[371px] h-[320px]">
+      <View className="p-6">
+        <Text className="text-xl font-rubik-medium text-center text-primary-100 mb-4">
+          {scheme.scheme_name}
+        </Text>
+
+        <View className="h-[1px] bg-gray-200 mb-4" />
+
+        <Text className="text-lg font-rubik text-primary-100 mb-4">
+          Remaining months - {scheme.remaining_months}
+        </Text>
+
+        <View className="h-2 bg-gray-200 rounded-full mb-2">
+          <View
+            className="h-full bg-primary-100 rounded-full"
+            style={{ 
+              width: `${((scheme.installment_months - scheme.remaining_months) / scheme.installment_months) * 100}%` 
+            }}
+          />
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-base font-rubik-semibold text-primary-100">Scheme</Text>
+          <Text className="text-base font-rubik text-gray-600">
+            PONNUDURAI - MONTHLY
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-base font-rubik-semibold text-primary-100">Installment</Text>
+          <Text className="text-base font-rubik text-gray-600">
+            {scheme.installment_months} Months
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-base font-rubik-semibold text-primary-100">Scheme Type</Text>
+          <Text className="text-base font-rubik text-gray-600">
+            {scheme.scheme_type}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-base font-rubik-semibold text-primary-100">Close Date</Text>
+          <Text className="text-base font-rubik text-gray-600">
+            {scheme.close_date}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-base font-rubik-semibold text-primary-100">Total Savings</Text>
+          <Text className="text-base font-rubik text-gray-600">
+            {scheme.total_savings} Grams
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          className="bg-primary-100 px-8 py-3 rounded-full mb-4 w-full mt-5"
+          onPress={() => router.push('/(root)/(tabs)/payment')}
+        >
+          <Text className="text-white text-center font-rubik-medium text-lg">
+            Pay
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   const banners = [
     { id: 1, image: image.banner1 },
@@ -358,6 +468,17 @@ export default function Index() {
           <View className="mt-6 bg-white rounded-lg shadow-lg border border-gray-200 w-[371px] h-[320px]">
             <View className="p-6">
               {/* Title */}
+              {loading ? (
+              <View className="flex-1 justify-center items-center">
+                <Text>Loading schemes...</Text>
+              </View>
+            ) : userSchemes.length > 0 ? (
+              userSchemes.map(scheme => renderScheme(scheme))
+            ) : (
+              <Text className="text-gray-500 text-center">
+                No active schemes found. Join a scheme to get started!
+              </Text>
+            )}
               <Text className="text-xl font-rubik-medium text-center text-primary-100 mb-4">
                 PD2025 - RAJA
               </Text>

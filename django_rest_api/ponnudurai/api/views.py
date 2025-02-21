@@ -1,68 +1,106 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
 from .serializers import *
 from goldLoan.models import *
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 
 
-class LivePriceView(generics.ListAPIView):
-    serializer_class = LivePriceSerializer
+class CheckUserView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+            if user.check_password(password):  # Verify password
+                return Response({'exists': True}, status=status.HTTP_200_OK)
+            else:
+                return Response({'exists': False, 'error': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({'exists': False, 'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def check_existing_user(request):
+    email = request.query_params.get('email')
+    phone = request.query_params.get('phone')
     
-    def get_queryset(self):
-        # Get only the most recent price entry
-        return LivePrice.objects.all().order_by('-timestamp')[:1]
+    email_exists = User.objects.filter(email=email).exists() if email else False
+    phone_exists = User.objects.filter(phone_number=phone).exists() if phone else False
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if queryset.exists():
-            latest_price = queryset.first()
-            return Response({
-                'gold_price': float(latest_price.gold_price),
-                'silver_price': float(latest_price.silver_price)
-            })
-        return Response({
-            'gold_price': 0.0,
-            'silver_price': 0.0
-        })
+    return Response({
+        'email_exists': email_exists,
+        'phone_exists': phone_exists
+    })
 
-
+@api_view(['POST'])
+def verify_user(request):
+    try:
+        email = request.data.get('email')
+        user = User.objects.get(email=email)
+        return Response({'status': 'success'})
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'User not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
 
 class UserView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     
     def perform_create(self, serializer):
-        email = self.request.data.get('email')
-        password = self.request.data.get('password')
-        if email and password:
-            serializer.save(email=email, password=password)
+        serializer.save()
 #              Scheme
 
 class JoinSchemeListCreateView(generics.ListCreateAPIView):
     queryset = JoinScheme.objects.all()
-    serializer_class = JoinSchemeSerializer
+    serializer_class = JoinSchemeSerializer  # Ensure only authenticated users can access
 
     def perform_create(self, serializer):
-        serializer.save() 
+        serializer.save()
 
-class GetSchemeListView(generics.ListCreateAPIView):
+
+class GetSchemeListView(generics.ListCreateAPIView):  # Changed back to ListCreateAPIView to handle POST
     serializer_class = JoinSchemeSerializer
     
     def get_queryset(self):
-        # Check both request.data and query_params
+        # Get phone number from either query params or request body
         phone_number = (
             self.request.data.get('phone') or 
             self.request.query_params.get('phone')
         )
         
-        print("Phone number:", phone_number)  # Keep this debug print
+        if self.request.method == 'GET':
+            phone_number = self.request.query_params.get('phone')
+        elif self.request.method == 'POST':
+            phone_number = self.request.data.get('phone')
+            
+        print("Phone number:", phone_number)  # Debug print
         
         if phone_number:
-            return JoinScheme.objects.filter(phone__phone=phone_number).prefetch_related('payments')
-        
+            try:
+                # Convert to string in case it's passed as integer
+                phone_number = str(phone_number)
+                user = User.objects.get(phone_number=phone_number)
+                return JoinScheme.objects.filter(phone=user).prefetch_related('payments')
+            except User.DoesNotExist:
+                return JoinScheme.objects.none()
         return JoinScheme.objects.none()
     
     def list(self, request, *args, **kwargs):
+        has_phone = (
+            (request.method == 'GET' and 'phone' in request.query_params) or
+            (request.method == 'POST' and 'phone' in request.data)
+        )
+        
+        if not has_phone:
+            return Response({
+                "status": "error",
+                "message": "Phone number is required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
         queryset = self.get_queryset()
         if not queryset.exists():
             return Response({
@@ -75,6 +113,7 @@ class GetSchemeListView(generics.ListCreateAPIView):
             "status": "success",
             "data": serializer.data
         }, status=status.HTTP_200_OK)
+    
     
 class MakePaymentView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
@@ -234,9 +273,54 @@ class updateFeedsView(generics.ListCreateAPIView):
         serializer.save()   
 
 class getFeedsView(generics.ListCreateAPIView):
-    data = Feeds.objects.all()
     serializer_class = FeedSerializers
+    
+    def get_queryset(self):
+        # Returns feeds ordered by created_at (most recent first)
+        # This ordering is already set in the model's Meta class
+        return Feeds.objects.all()
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-
-
+class LivePriceView(generics.ListAPIView):
+    serializer_class = LivePriceSerializer
+    
+    def get_queryset(self):
+        # Get only the most recent price entry
+        return LivePrice.objects.all().order_by('-timestamp')[:1]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if queryset.exists():
+            latest_price = queryset.first()
+            return Response({
+                'gold_price': float(latest_price.gold_price),
+                'silver_price': float(latest_price.silver_price)
+            })
+        return Response({
+            'gold_price': 0.0,
+            'silver_price': 0.0
+        })
