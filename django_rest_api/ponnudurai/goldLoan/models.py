@@ -7,6 +7,14 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 class User(AbstractUser):
+    # Regular user, admin user, and super user roles
+    class Role(models.TextChoices):
+        NORMAL = 'NORMAL', 'Normal User'
+        ADMIN = 'ADMIN', 'Admin User'
+        SUPERUSER = 'SUPERUSER', 'Super User'
+
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.NORMAL)
+
     phone_regex = RegexValidator(
         regex=r'^\d{10}$',
         message="Phone number must be entered in the format: '9999999999'. Up to 10 digits allowed."
@@ -14,30 +22,32 @@ class User(AbstractUser):
     phone_number = models.CharField(
         max_length=15, 
         unique=True,
-        validators=[phone_regex]
+        validators=[phone_regex],
+        null=True,       # Allow NULL in the database
+        blank=True,      # Allow blank values in forms
     )
-    # Override the ManyToManyField relationships with custom related_names
-    groups = models.ManyToManyField(
-        'auth.Group',
-        verbose_name='groups',
-        blank=True,
-        related_name='custom_user_set',
-        related_query_name='custom_user'
-    )
-    
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        verbose_name='user permissions',
-        blank=True,
-        related_name='custom_user_set',
-        related_query_name='custom_user'
-    )
-    
+
+    # Override the save method
+    def save(self, *args, **kwargs):
+        # If the user is an admin, set is_staff to True
+        if self.role == self.Role.ADMIN:
+            self.is_staff = True
+        super().save(*args, **kwargs)
+
     class Meta:
         unique_together = ('id', 'phone_number')
         
     def __str__(self):
         return f"{self.username} - {self.phone_number}"
+
+    def is_normal_user(self):
+        return self.role == self.Role.NORMAL
+
+    def is_admin_user(self):
+        return self.role == self.Role.ADMIN
+
+    def is_super_user(self):
+        return self.role == self.Role.SUPERUSER
     
 
 class LivePrice(models.Model):

@@ -50,27 +50,16 @@
                         <span class="text"  style="color: #fff !important;">Users</span>
                     </a>
                 </li>
+                {% if request.user.is_super_user %}
                 <li class="menu-item">
-                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
-                        <span class="text"  style="color: #fff !important;">Transactions</span>
+                    <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
+                        <span class="text" style="color: #fff !important;">Admin Users</span>
                     </a>
                 </li>
+                {% endif %}
                 <li class="menu-item">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
-                        <span class="text"  style="color: #fff !important;">Account</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="#">User login</a>
-                        <a href="#">User registration</a>
-                        <a href="#">Error 404</a>
-                    </div>
-                </li>
-            </ul>
-            <hr>
-            <ul class="menu-aside">
-                <li class="menu-item">
-                    <a class="menu-link" href="page-settings-1.html"> <i class="icon material-icons md-settings"></i>
-                        <span class="text" style="color: #fff !important;">Settings</span>
+                    <a class="menu-link" href="{% url 'logout' %}"> <i class="icon material-icons md-exit_to_app"></i>
+                        <span class="text" style="color: #fff !important;">Logout</span>
                     </a>
                 </li>
             </ul>

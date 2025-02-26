@@ -2,7 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('', views.user_login, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('update-live-price/', views.update_live_price, name='update_live_price'),
 
     path('initiate-payment/<int:scheme_id>/', views.initiate_payment, name='initiate_payment'),
@@ -22,4 +25,8 @@ urlpatterns = [
     path('transation/', views.show_transation, name='show_transation'),  # Keeping your original URL name
     path('transactions/payment/<int:payment_id>/', views.payment_detail, name='payment_detail'),
     path('transactions/export/', views.export_payments, name='export_payments'),
+
+    path('admin-users/', views.admin_user_management, name='admin_user_management'),
+    path('admin-users/create/', views.create_admin_user, name='create_admin_user'),
+    path('admin-users/delete/<int:user_id>/', views.delete_admin_user, name='delete_admin_user'),
 ]

@@ -12,12 +12,65 @@ from datetime import timedelta
 import razorpay
 from django.conf import settings
 import requests
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+import logging
+from django.contrib.auth import logout
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+User = get_user_model()
+
+# Check if the user is a Super User
+def is_super_user(user):
+    return user.is_authenticated and user.is_super_user()
+
+# Admin User Management View
+@user_passes_test(is_super_user)
+def admin_user_management(request):
+    admin_users = User.objects.filter(role=User.Role.ADMIN)
+    return render(request, 'admin_user_management.html', {'admin_users': admin_users})
+
+# Create Admin User View
+@user_passes_test(is_super_user)
+def create_admin_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        phone_number = request.POST.get('phone_number')
+
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                phone_number=phone_number,
+                role=User.Role.ADMIN,
+                is_staff=True,  # Set is_staff to True for admin users
+            )
+            messages.success(request, 'Admin user created successfully!')
+            return redirect('admin_user_management')
+        except Exception as e:
+            messages.error(request, f'Error creating admin user: {str(e)}')
+    return render(request, 'create_admin_user.html')
+
+# Delete Admin User View
+@user_passes_test(is_super_user)
+def delete_admin_user(request, user_id):
+    user = get_object_or_404(User, id=user_id, role=User.Role.ADMIN)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Admin user deleted successfully!')
+        return redirect('admin_user_management')
+    return render(request, 'confirm_delete_admin_user.html', {'user': user})
 
 def show_transaction(request):
     # Get all payments ordered by the most recent first
     all_payments = Payment.objects.all().order_by('-paymentDate', '-id')
+    print(f"Found {len(all_payments)} payments") 
     
     # Pagination
     paginator = Paginator(all_payments, 10)  # Show 10 payments per page
@@ -118,33 +171,26 @@ def payment_success(request, scheme_id):
         latest_prices = LivePrice.objects.first()
         amount = float(request.POST.get('amount')) / 100  # Convert back to rupees
 
-        # Fetch the latest gold price from the LivePriceView API
+        # Fetch the latest gold price
         try:
-            response = requests.get(settings.LIVE_PRICE_API_URL) # Replace with your actual API URL
+            response = requests.get(settings.LIVE_PRICE_API_URL)
             if response.status_code == 200:
                 gold_price = latest_prices.gold_price
                 print(gold_price)
             else:
-                gold_price = 8000  # Fallback value if the API fails
+                gold_price = 8000  # Fallback value
         except Exception as e:
-            gold_price = 8000  # Fallback value if there's an error
+            gold_price = 8000  # Fallback value
 
         # Verify the payment
         try:
             payment = client.payment.fetch(payment_id)
             if payment['status'] == 'captured':
-                # Update the scheme's payment details
-                scheme.totalAmountPaid += amount
-                scheme.NumberOfTimesPaid += 1
-                scheme.remainingPayments = max(0, scheme.remainingPayments - 1)
-
                 # Calculate gold added based on the fetched gold rate
                 gold_added = amount / gold_price
-                scheme.totalGold += gold_added
-
-                scheme.save()
 
                 # Create a Payment record
+                # The Payment model's save method will update the scheme
                 Payment.objects.create(
                     schemeCode=scheme,
                     amountPaid=amount,
@@ -159,6 +205,7 @@ def payment_success(request, scheme_id):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 @csrf_exempt
 def create_scheme(request):
@@ -205,9 +252,18 @@ def update_live_price(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
+def show_live_price(request):
+    latest_prices = LivePrice.objects.all()
+    return render(request, 'index.html', {'latest_prices': latest_prices})
+
+
 def dashboard(request):
-    latest_prices = LivePrice.objects.first()  
-    print(latest_prices)
+    if not (request.user.is_superuser or request.user.is_staff):
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('login')
+    
+    # Get latest prices outside the if condition
+    latest_prices = LivePrice.objects.order_by('-timestamp').first()
     return render(request, 'index.html', {'latest_prices': latest_prices})
 
 def scheme_list(request):
@@ -274,4 +330,32 @@ def add_users(request):
 def show_transation(request):
     transation = Payment.objects.all()
     return render(request, 'transactions.html', {'transaction': transation})
+
+
+
+logger = logging.getLogger(__name__)
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            if user.is_superuser or user.is_staff or user.role == 'SUPERUSER':  # Check custom role too
+                return redirect('dashboard')  # Redirect to dashboard
+            else:
+                messages.error(request, 'You do not have permission to access this page.')
+                return redirect('login')
+        else:
+            messages.error(request, 'Invalid username or password.')
+            return redirect('login')
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have been successfully logged out.")
+    return redirect('login')
 
