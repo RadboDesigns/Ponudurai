@@ -110,27 +110,22 @@ class Payment(models.Model):
     paymentDate = models.DateField(default=get_current_date)
     amountPaid = models.DecimalField(max_digits=10, decimal_places=2)
     goldAdded = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         is_new = not self.pk  # Check if this is a new payment
         
+        # First save the payment itself
+        super().save(*args, **kwargs)
+        
         if is_new:
             # Update the scheme's total amounts
             scheme = self.schemeCode
+            scheme.totalAmountPaid += self.amountPaid
             scheme.NumberOfTimesPaid += 1
             scheme.remainingPayments = max(0, scheme.remainingPayments - 1)
             scheme.save()
-            
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        # Update the scheme's totals when a payment is deleted
-        scheme = self.schemeCode
-        scheme.NumberOfTimesPaid -= 1
-        scheme.remainingPayments += 1
-        scheme.save()
-        
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"Payment for {self.schemeCode.schemeCode} on {self.paymentDate}"

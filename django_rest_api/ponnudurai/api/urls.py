@@ -9,6 +9,7 @@ urlpatterns = [
 
     path('check-user/', check_existing_user, name='check-user'),
     path('user/', UserView.as_view(), name='user'),
+    path('login/', LoginView.as_view(), name='login'),
     path('user/check/', CheckUserView.as_view(), name='check-user'),
 
     path('join_scheme/', JoinSchemeListCreateView.as_view(), name='join_scheme_view'),
@@ -20,4 +21,6 @@ urlpatterns = [
     path('updateFeeds/', updateFeedsView.as_view(), name='update_feeds_view'),
     path('Feeds/', updateFeedsView.as_view(), name='update_feeds_view'),
     
-]
+]         
+
+

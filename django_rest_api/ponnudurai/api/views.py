@@ -5,7 +5,32 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from django.contrib.auth.hashers import check_password
 
+
+class LoginView(APIView):
+    def post(self, request):
+        phone = request.data.get('phone')
+        password = request.data.get('password')
+
+        try:
+            user = User.objects.get(phone_number=phone)
+            if check_password(password, user.password):  # Verify password
+                return Response({
+                    'exists': True,
+                    'user_id': user.id,
+                    'phone_number': user.phone_number
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'exists': False,
+                    'error': 'Invalid password'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({
+                'exists': False,
+                'error': 'User not found'
+            }, status=status.HTTP_404_NOT_FOUND)
 
 class CheckUserView(APIView):
     def post(self, request):

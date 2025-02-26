@@ -1,0 +1,621 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Evara Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/imgs/theme/favicon.svg' %}">
+    <!-- Template CSS -->
+    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="index.html" class="brand-wrap">
+                <!-- ../static/assets/imgs/theme/logo.svg -->
+                <img src="{% static 'assets/imgs/theme/logo.svg' %}" class="logo" alt="Evara Dashboard">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item active">
+                    <a class="menu-link" href="{% url 'dashboard' %}"> <i class="icon material-icons md-home"></i>
+                        <span class="text"  style="color: #fff !important;">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
+                        <span class="text"  style="color: #fff !important;">Schemes</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_feeds' %}"> <i class="icon material-icons md-add_box"></i>
+                        <span class="text" style="color: #fff !important;">Show Feeds</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
+                        <span class="text" style="color: #fff !important;">Users</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text" style="color: #fff !important;">Transactions</span>
+                    </a>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
+                        <span class="text" style="color: #fff !important;">Account</span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#">User login</a>
+                        <a href="#">User registration</a>
+                        <a href="#">Error 404</a>
+                    </div>
+                </li>
+            </ul>
+            <hr>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="page-settings-1.html"> <i class="icon material-icons md-settings"></i>
+                        <span class="text" style="color: #fff !important;">Settings</span>
+                    </a>
+                </li>
+            </ul>
+            <br>
+            <br>
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-search">
+                <form class="searchform">
+                    <div class="input-group">
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search term">
+                        <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
+                    </div>
+                    <datalist id="search_terms">
+                        <option value="Products">
+                        <option value="New orders">
+                        <option value="Apple iphone">
+                        <option value="Ahmed Hassan">
+                    </datalist>
+                </form>
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn-icon" href="#">
+                            <i class="material-icons md-notifications animation-shake"></i>
+                            <span class="badge rounded-pill">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="{% static 'assets/imgs/people/avatar2.jpg' %}" alt="User"></a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="#"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </header>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Dashboard </h2>
+                    <p>Whole data about your business here</p>
+                </div>
+                <div>
+                    <a href="#" class="btn btn-primary" id="updatePriceBtn">
+                        <i class="text-muted material-icons md-post_add"></i>Update Live Price
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light">
+                                <i class="text-primary material-icons md-monetization_on"></i>
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Gold Price</h6>
+                                {% if latest_prices %}
+                                    <span>${{ latest_prices.gold_price|floatformat:2 }}</span>
+                                    <span class="text-sm">
+                                        Last updated: {{ latest_prices.timestamp|date:"d M Y H:i" }}
+                                    </span>
+                                {% else %}
+                                    <span>Price not available</span>
+                                {% endif %}
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Silver Price</h6> 
+                                {% if latest_prices %}
+                                    <span>${{ latest_prices.silver_price|floatformat:2 }}</span>
+                                    <span class="text-sm">
+                                        Last updated: {{ latest_prices.timestamp|date:"d M Y H:i" }}
+                                    </span>
+                                {% else %}
+                                    <span>Price not available</span>
+                                {% endif %}
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">New Customer</h6> <span>9</span>
+                                <span class="text-sm">
+                                    In 19 Categories
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span>$6,982</span>
+                                <span class="text-sm">
+                                    Based in your local time.
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 col-lg-12">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Sale statistics</h5>
+                            <canvas id="myChart" height="120px"></canvas>
+                        </article>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <div class="card mb-4">
+                                <article class="card-body">
+                                    <h5 class="card-title">New Members</h5>
+                                    <div class="new-member-list">
+                                        <div class="d-flex align-items-center justify-content-between mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{% static 'assets/imgs/people/avatar4.jpg' %}" alt="" class="avatar">
+                                                <div>
+                                                    <h6>Patric Adams</h6>
+                                                    <p class="text-muted font-xs">
+                                                        Sanfrancisco
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{% static 'assets/imgs/people/avatar2.jpg' %}" alt="" class="avatar">
+                                                <div>
+                                                    <h6>Dilan Specter</h6>
+                                                    <p class="text-muted font-xs">
+                                                        Sanfrancisco
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{% static 'assets/imgs/people/avatar3.jpg' %}" alt="" class="avatar">
+                                                <div>
+                                                    <h6>Tomas Baker</h6>
+                                                    <p class="text-muted font-xs">
+                                                        Sanfrancisco
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="card mb-4">
+                                <article class="card-body">
+                                    <h5 class="card-title">Recent activities</h5>
+                                    <ul class="verti-timeline list-unstyled font-sm">
+                                        <li class="event-list">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span>Today</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        Lorem ipsum dolor sit amet consectetur
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="event-list active">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl animation-fade-right"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span>17 May</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        Debitis nesciunt voluptatum dicta reprehenderit
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="event-list">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span>13 May</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        Accusamus voluptatibus voluptas.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="event-list">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span>05 April</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        At vero eos et accusamus et iusto odio dignissi
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="event-list">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span>26 Mar</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        Responded to need “Volunteer Activities
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-12">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Revenue Base on Area</h5>
+                            <canvas id="myChart2" height="217"></canvas>
+                        </article>
+                    </div>
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Marketing Chanel</h5>
+                            <span class="text-muted font-xs">Facebook</span>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 15%">15%</div>
+                            </div>
+                            <span class="text-muted font-xs">Instagram</span>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 65%">65% </div>
+                            </div>
+                            <span class="text-muted font-xs">Google</span>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 51%"> 51% </div>
+                            </div>
+                            <span class="text-muted font-xs">Twitter</span>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 80%"> 80%</div>
+                            </div>
+                            <span class="text-muted font-xs">Other</span>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 80%"> 80%</div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Add this modal to your HTML template -->
+
+
+
+            <div id="updatePriceModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2>Update Live Prices</h2>
+                    <form id="updatePriceForm">
+                        <div class="form-group">
+                            <label for="gold_price">Gold Price:</label>
+                            <input type="number" id="gold_price" name="gold_price" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="silver_price">Silver Price:</label>
+                            <input type="number" id="silver_price" name="silver_price" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Prices</button>
+                    </form>
+                </div>
+            </div>
+            
+        </section> <!-- content-main end// -->
+        <footer class="main-footer font-xs">
+            <div class="row pb-30 pt-15">
+                <div class="col-sm-6">
+                    <script>
+                    document.write(new Date().getFullYear())
+                    </script> ©, Evara - HTML Ecommerce Template .
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-sm-end">
+                        All rights reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <script src="{% static 'assets/js/vendors/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery.fullscreen.min.js' %}"></script>
+    <script src="{%static 'assets/js/vendors/chart.js' %}"></script>
+    <!-- Main Script -->
+    <script src="{% static 'assets/js/main.js' %}" type="text/javascript"></script>
+    <script src="{% static 'assets/js/custom-chart.js' %}" type="text/javascript"></script>
+</body>
+
+</html>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        max-width: 500px;
+        border-radius: 8px;
+    }
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-modal:hover {
+        color: #000;
+    }
+</style>
+
+<!-- Add this JavaScript to your HTML template -->
+<script>
+    // Get the modal and button elements
+    const modal = document.getElementById('updatePriceModal');
+    const updatePriceBtn = document.querySelector('.btn.btn-primary');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const updatePriceForm = document.getElementById('updatePriceForm');
+
+    // Show the modal when the "Update Live Price" button is clicked
+    updatePriceBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+
+    // Close the modal when the close button is clicked
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close the modal when clicking outside the modal
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Handle form submission
+    updatePriceForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(updatePriceForm);
+        const goldPrice = formData.get('gold_price');
+        const silverPrice = formData.get('silver_price');
+
+        try {
+            const response = await fetch('{% url "update_live_price" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert(data.message);
+                modal.style.display = 'none';
+                location.reload(); // Reload the page to reflect the updated prices
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while updating prices.');
+        }
+    });
+</script>
+
+
+
+<!-- <script>
+
+
+    var ctx1 = document.getElementById("chart-line").getContext("2d");
+
+    var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(94, 114, 228, 0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(94, 114, 228, 0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(94, 114, 228, 0)');
+    new Chart(ctx1, {
+      type: "line",
+      data: {
+        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+          label: "Mobile apps",
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#5e72e4",
+          backgroundColor: gradientStroke1,
+          borderWidth: 3,
+          fill: true,
+          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+          maxBarThickness: 6
+
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              padding: 10,
+              color: '#fbfbfb',
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              color: '#ccc',
+              padding: 20,
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+  </script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+  <script src="./static/js/argon-dashboard.min.js?v=2.0.4"></script> -->

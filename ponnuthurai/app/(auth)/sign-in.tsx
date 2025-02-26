@@ -22,7 +22,7 @@ export default function SignIn() {
       // Check if the user exists in the backend
       const response = await fetch(`${BACKEND_URL}/user/check/`, {
         method: 'POST',
-        headers: {
+        headers: {2
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),

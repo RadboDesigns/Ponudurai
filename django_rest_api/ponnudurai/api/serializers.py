@@ -9,14 +9,26 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
     
     class Meta:
         model = User
-        fields = ('id', 'phone_number', 'password')
+        fields = ('id', 'username', 'email', 'phone_number', 'password')
         extra_kwargs = {
             'password': {'write_only': True},
         }
-
+    
+    def create(self, validated_data):
+        # Create a new user with a hashed password
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            phone_number=validated_data['phone_number'],
+            password=validated_data['password']  # Django will hash this automatically
+        )
+        return user
+    
 class DateFieldWithoutTime(serializers.Field):
     def to_representation(self, value):
         # Convert datetime to date for representation
