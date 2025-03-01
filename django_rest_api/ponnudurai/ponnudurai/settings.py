@@ -29,6 +29,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-secret-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 
+CELERY_BROKER_URL = 'django://'
+CELERY_RESULT_BACKEND = 'django-db'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'goldLoan',
     'rest_framework',
     'corsheaders',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -173,3 +177,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # settings.py
 LIVE_PRICE_API_URL = 'http://127.0.0.1:8000/api/live-price/'  # Replace with your actual API URL
+
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_RESULT_BACKEND = 'django-cache'
+
+# pick which cache from the CACHES setting.
+CELERY_CACHE_BACKEND = 'default'
+
+# django setting.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}
+
+# settings.py
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as the message broker
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'Asia/Kolkata'  # Set your timezone
+CELERY_WORKER_POOL = 'solo'  
+
+TIME_ZONE = 'Asia/Kolkata'
+USE_TZ = True

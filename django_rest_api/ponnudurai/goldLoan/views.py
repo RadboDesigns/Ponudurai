@@ -19,10 +19,55 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 import logging
 from django.contrib.auth import logout
+import json
+from django.views.decorators.http import require_POST
+from rest_framework import generics
+from .tasks import update_live_prices
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 User = get_user_model()
 
+
+@csrf_exempt
+def process_cash_payment(request):
+    try:
+        data = json.loads(request.body)
+        scheme_id = data.get('scheme_id')
+        
+        # Get the scheme
+        scheme = JoinScheme.objects.get(id=scheme_id)
+        
+        # Fetch the latest gold price
+        try:
+            latest_prices = LivePrice.objects.first()
+            gold_price = latest_prices.gold_price
+        except Exception as e:
+            gold_price = 8000  # Fallback value if gold price is not available
+
+        # Calculate gold added based on the cash payment amount and round to 4 decimal places
+        amount_paid = scheme.payAmount
+        gold_added = round(amount_paid / gold_price, 4)  # Round to 4 decimal places
+
+        # Create a new payment
+        payment = Payment(
+            schemeCode=scheme,
+            paymentDate=timezone.now().date(),
+            amountPaid=amount_paid,
+            goldAdded=gold_added,  # Add gold equivalent for cash payment (rounded)
+            payment_method='cash'  # Set payment method to cash
+        )
+        payment.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Cash payment processed successfully'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+    
 # Check if the user is a Super User
 def is_super_user(user):
     return user.is_authenticated and user.is_super_user()
@@ -177,8 +222,6 @@ def payment_success(request, scheme_id):
             if response.status_code == 200:
                 gold_price = latest_prices.gold_price
                 print(gold_price)
-            else:
-                gold_price = 8000  # Fallback value
         except Exception as e:
             gold_price = 8000  # Fallback value
 
@@ -359,3 +402,51 @@ def logout_view(request):
     messages.success(request, "You have been successfully logged out.")
     return redirect('login')
 
+
+def live_price_view(request):
+    """View to display the latest gold and silver prices"""
+    try:
+        # Get the latest price entry
+        latest_prices = LivePrice.objects.order_by('-timestamp').first()
+        
+        # Context with the latest prices
+        context = {
+            'latest_prices': latest_prices,
+        }
+        
+        # Render the template with the latest prices
+        return render(request, 'your_template.html', context)
+    except Exception as e:
+        # Return error context 
+        context = {
+            'error': str(e),
+            'latest_prices': None,
+        }
+        return render(request, 'your_template.html', context)
+
+@csrf_exempt
+def update_live_price(request):
+    """Manual trigger for updating the prices"""
+    try:
+        # Run the Celery task synchronously for immediate response
+        result = update_live_prices.delay()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Price update task has been triggered',
+            'task_id': result.id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Failed to trigger price update: {str(e)}'
+        }, status=500)
+
+def price_history(request):
+    """View to display historical price data"""
+    # Get the last 30 price entries
+    history = LivePrice.objects.order_by('-timestamp')[:30]
+    
+    return render(request, 'goldLoan/price_history.html', {
+        'history': history
+    })

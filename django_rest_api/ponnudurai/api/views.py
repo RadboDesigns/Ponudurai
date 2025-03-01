@@ -6,6 +6,289 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
+from django.conf import settings
+import razorpay
+import requests
+from requests.exceptions import RequestException, Timeout
+
+client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+
+
+
+
+class HealthCheckView(APIView):
+    """
+    Simple health check endpoint to verify API connectivity
+    """
+    def get(self, request, *args, **kwargs):
+        return Response({
+            "status": "success",
+            "message": "API is running"
+        }, status=status.HTTP_200_OK)
+
+#             PAYMENT
+
+
+class CreateRazorpayOrderView(APIView):
+    def post(self, request, *args, **kwargs):
+        amount = request.data.get('amount')
+        currency = request.data.get('currency', 'INR')
+        receipt = request.data.get('receipt')
+
+        if not amount:
+            return Response({
+                "status": "error",
+                "message": "Amount is required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        client = razorpay.Client(auth=("rzp_test_6DPEFbutV2mNls", "oCey9oaLegJcYcjeBO201ZLE"))
+
+        try:
+            order = client.order.create({
+                "amount": amount,
+                "currency": currency,
+                "receipt": receipt,
+                "payment_capture": 1
+            })
+
+            return Response({
+                "status": "success",
+                "order": order
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class HandlePaymentSuccessView(APIView):
+    def post(self, request, *args, **kwargs):
+        scheme_code = request.data.get('scheme_code')
+        payment_id = request.data.get('paymentId')
+        order_id = request.data.get('orderId')
+        signature = request.data.get('signature')
+        amount = request.data.get('amount')  # Amount in paise
+
+        if not all([scheme_code, payment_id, order_id, signature, amount]):
+            return Response({
+                "status": "error",
+                "message": "All fields are required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch the scheme
+            scheme = JoinScheme.objects.get(schemeCode=scheme_code)
+
+            # Fetch the latest gold price
+            latest_price = LivePrice.objects.first()
+            if not latest_price:
+                return Response({
+                    "status": "error",
+                    "message": "Gold price not available"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Convert amount from paise to rupees
+            amount_in_rupees = float(amount) / 100
+
+            # Calculate gold added
+            gold_added = round(amount_in_rupees / latest_price.gold_price, 4)
+
+            # Create a payment record
+            payment = Payment.objects.create(
+                schemeCode=scheme,
+                paymentId=payment_id,
+                orderId=order_id,
+                signature=signature,
+                amount=amount_in_rupees,
+                goldAdded=gold_added,
+                status='success'
+            )
+
+            # Update scheme details
+            scheme.NumberOfTimesPaid += 1
+            scheme.totalAmountPaid += amount_in_rupees
+            scheme.totalGold += gold_added
+            scheme.save()
+
+            return Response({
+                "status": "success",
+                "message": "Payment saved successfully",
+                "data": {
+                    "payment_id": payment.id,
+                    "scheme_code": scheme.schemeCode,
+                    "amount_paid": amount_in_rupees,
+                    "gold_added": gold_added,
+                    "total_gold": scheme.totalGold,
+                    "total_amount_paid": scheme.totalAmountPaid
+                }
+            }, status=status.HTTP_200_OK)
+
+        except JoinScheme.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Invalid scheme code"
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class MakePaymentView(generics.CreateAPIView):
+    serializer_class = PaymentSerializer
+    
+    def calculate_gold_amount(self, amount_paid):
+        try:
+            # Get the latest gold price
+            latest_price = LivePrice.objects.first()  # Gets most recent due to Meta ordering
+            if not latest_price:
+                raise ValueError("No gold price available")
+            
+            # Calculate gold amount (amount_paid / price_per_gram)
+            gold_amount = float(amount_paid) / float(latest_price.gold_price)
+            # Round to 3 decimal places
+            return round(gold_amount, 3)
+            
+        except Exception as e:
+            raise ValueError(f"Error calculating gold amount: {str(e)}")
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            # Get scheme_code and amount from request data
+            scheme_code = request.data.get('schemeCode')
+            amount_paid = request.data.get('amountPaid')
+            
+            if not scheme_code or not amount_paid:
+                return Response({
+                    "status": "error",
+                    "message": "Both schemeCode and amountPaid are required"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Find the scheme
+            try:
+                scheme = JoinScheme.objects.get(schemeCode=scheme_code)
+            except JoinScheme.DoesNotExist:
+                return Response({
+                    "status": "error",
+                    "message": "Invalid scheme code"
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Calculate gold amount
+            try:
+                gold_added = self.calculate_gold_amount(amount_paid)
+            except ValueError as e:
+                return Response({
+                    "status": "error",
+                    "message": str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Create payment with calculated gold
+            payment = Payment.objects.create(
+                schemeCode=scheme,
+                amountPaid=amount_paid,
+                goldAdded=gold_added
+            )
+            
+            # Update scheme's total gold
+            scheme.totalGold += gold_added
+            scheme.totalAmountPaid += int(amount_paid)
+            scheme.save()
+            
+            # Return updated details
+            scheme_serializer = JoinSchemeSerializer(scheme)
+            payment_serializer = self.get_serializer(payment)
+            
+            latest_price = LivePrice.objects.first()
+            
+            return Response({
+                "status": "success",
+                "message": "Payment recorded successfully",
+                "data": {
+                    "payment": payment_serializer.data,
+                    "updated_scheme": scheme_serializer.data,
+                    "calculation_details": {
+                        "amount_paid": amount_paid,
+                        "gold_price_per_gram": str(latest_price.gold_price),
+                        "gold_added": gold_added,
+                        "current_total_gold": scheme.totalGold
+                    }
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class PaymentListCreateView(generics.ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+class SchemePaymentsView(generics.ListAPIView):
+    serializer_class = PaymentSerializer
+    
+    def get_queryset(self):
+        scheme_code = self.request.data.get('scheme_code') or self.request.query_params.get('scheme_code')
+        if scheme_code:
+            return Payment.objects.filter(schemeCode__schemeCode=scheme_code).order_by('-paymentDate')
+        return Payment.objects.none()
+    
+    def list(self, request, *args, **kwargs):
+        # Check both request body and query params
+        scheme_code = request.data.get('scheme_code') or request.query_params.get('scheme_code')
+        
+        print("Received scheme code:", scheme_code)  # Debug print
+        
+        if not scheme_code:
+            return Response({
+                "status": "error",
+                "message": "Scheme code is required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            # First verify the scheme exists
+            scheme = JoinScheme.objects.get(schemeCode=scheme_code)
+            
+            # Get payments
+            queryset = self.get_queryset()
+            if not queryset.exists():
+                return Response({
+                    "status": "error",
+                    "message": "No payments found for this scheme"
+                }, status=status.HTTP_404_NOT_FOUND)
+                
+            serializer = self.get_serializer(queryset, many=True)
+            
+            # Include scheme summary
+            scheme_summary = {
+                "scheme_code": scheme.schemeCode,
+                "customer_name": scheme.Name,
+                "total_payments_made": scheme.NumberOfTimesPaid,
+                "remaining_payments": scheme.remainingPayments,
+                "total_amount_paid": str(scheme.totalAmountPaid),
+                "total_gold": str(scheme.totalGold)
+            }
+            
+            return Response({
+                "status": "success",
+                "scheme_summary": scheme_summary,
+                "payments": serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except JoinScheme.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Invalid scheme code"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        
+        #End Of Payment
 
 
 class LoginView(APIView):
@@ -140,154 +423,6 @@ class GetSchemeListView(generics.ListCreateAPIView):  # Changed back to ListCrea
         }, status=status.HTTP_200_OK)
     
     
-class MakePaymentView(generics.CreateAPIView):
-    serializer_class = PaymentSerializer
-    
-    def calculate_gold_amount(self, amount_paid):
-        try:
-            # Get the latest gold price
-            latest_price = LivePrice.objects.first()  # Gets most recent due to Meta ordering
-            if not latest_price:
-                raise ValueError("No gold price available")
-            
-            # Calculate gold amount (amount_paid / price_per_gram)
-            gold_amount = float(amount_paid) / float(latest_price.gold_price)
-            # Round to 3 decimal places
-            return round(gold_amount, 3)
-            
-        except Exception as e:
-            raise ValueError(f"Error calculating gold amount: {str(e)}")
-    
-    def create(self, request, *args, **kwargs):
-        try:
-            # Get scheme_code and amount from request data
-            scheme_code = request.data.get('schemeCode')
-            amount_paid = request.data.get('amountPaid')
-            
-            if not scheme_code or not amount_paid:
-                return Response({
-                    "status": "error",
-                    "message": "Both schemeCode and amountPaid are required"
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Find the scheme
-            try:
-                scheme = JoinScheme.objects.get(schemeCode=scheme_code)
-            except JoinScheme.DoesNotExist:
-                return Response({
-                    "status": "error",
-                    "message": "Invalid scheme code"
-                }, status=status.HTTP_404_NOT_FOUND)
-            
-            # Calculate gold amount
-            try:
-                gold_added = self.calculate_gold_amount(amount_paid)
-            except ValueError as e:
-                return Response({
-                    "status": "error",
-                    "message": str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Create payment with calculated gold
-            payment = Payment.objects.create(
-                schemeCode=scheme,
-                amountPaid=amount_paid,
-                goldAdded=gold_added
-            )
-            
-            # Update scheme's total gold
-            scheme.totalGold += gold_added
-            scheme.totalAmountPaid += int(amount_paid)
-            scheme.save()
-            
-            # Return updated details
-            scheme_serializer = JoinSchemeSerializer(scheme)
-            payment_serializer = self.get_serializer(payment)
-            
-            latest_price = LivePrice.objects.first()
-            
-            return Response({
-                "status": "success",
-                "message": "Payment recorded successfully",
-                "data": {
-                    "payment": payment_serializer.data,
-                    "updated_scheme": scheme_serializer.data,
-                    "calculation_details": {
-                        "amount_paid": amount_paid,
-                        "gold_price_per_gram": str(latest_price.gold_price),
-                        "gold_added": gold_added,
-                        "current_total_gold": scheme.totalGold
-                    }
-                }
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            return Response({
-                "status": "error",
-                "message": str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-#             Payment
-class PaymentListCreateView(generics.ListCreateAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-class SchemePaymentsView(generics.ListAPIView):
-    serializer_class = PaymentSerializer
-    
-    def get_queryset(self):
-        scheme_code = self.request.data.get('scheme_code') or self.request.query_params.get('scheme_code')
-        if scheme_code:
-            return Payment.objects.filter(schemeCode__schemeCode=scheme_code).order_by('-paymentDate')
-        return Payment.objects.none()
-    
-    def list(self, request, *args, **kwargs):
-        # Check both request body and query params
-        scheme_code = request.data.get('scheme_code') or request.query_params.get('scheme_code')
-        
-        print("Received scheme code:", scheme_code)  # Debug print
-        
-        if not scheme_code:
-            return Response({
-                "status": "error",
-                "message": "Scheme code is required"
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-        try:
-            # First verify the scheme exists
-            scheme = JoinScheme.objects.get(schemeCode=scheme_code)
-            
-            # Get payments
-            queryset = self.get_queryset()
-            if not queryset.exists():
-                return Response({
-                    "status": "error",
-                    "message": "No payments found for this scheme"
-                }, status=status.HTTP_404_NOT_FOUND)
-                
-            serializer = self.get_serializer(queryset, many=True)
-            
-            # Include scheme summary
-            scheme_summary = {
-                "scheme_code": scheme.schemeCode,
-                "customer_name": scheme.Name,
-                "total_payments_made": scheme.NumberOfTimesPaid,
-                "remaining_payments": scheme.remainingPayments,
-                "total_amount_paid": str(scheme.totalAmountPaid),
-                "total_gold": str(scheme.totalGold)
-            }
-            
-            return Response({
-                "status": "success",
-                "scheme_summary": scheme_summary,
-                "payments": serializer.data
-            }, status=status.HTTP_200_OK)
-            
-        except JoinScheme.DoesNotExist:
-            return Response({
-                "status": "error",
-                "message": "Invalid scheme code"
-            }, status=status.HTTP_404_NOT_FOUND)
 
 #              Feeds
 class updateFeedsView(generics.ListCreateAPIView):
@@ -339,13 +474,19 @@ class LivePriceView(generics.ListAPIView):
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        print("Queryset:", queryset)
         if queryset.exists():
             latest_price = queryset.first()
+            print("Latest Price from DB:", latest_price.gold_price, latest_price.timestamp)
             return Response({
                 'gold_price': float(latest_price.gold_price),
-                'silver_price': float(latest_price.silver_price)
+                'silver_price': float(latest_price.silver_price),
+                'timestamp': latest_price.timestamp,
+                'last_updated': latest_price.timestamp.strftime('%d %b %Y %H:%M')
             })
         return Response({
             'gold_price': 0.0,
-            'silver_price': 0.0
+            'silver_price': 0.0,
+            'timestamp': None,
+            'last_updated': 'Never'
         })

@@ -6,10 +6,14 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     path('dashboard/', views.dashboard, name='dashboard'),
+
+    path('live-price/', views.live_price_view, name='live_price_view'),
     path('update-live-price/', views.update_live_price, name='update_live_price'),
+    path('price-history/', views.price_history, name='price_history'),
 
     path('initiate-payment/<int:scheme_id>/', views.initiate_payment, name='initiate_payment'),
     path('payment-success/<int:scheme_id>/', views.payment_success, name='payment_success'),
+    path('process-cash-payment/', views.process_cash_payment, name='process_cash_payment'),
 
     path('schemes/', views.scheme_list, name='scheme_list'),
     path('create-scheme/', views.create_scheme, name='create_scheme'),

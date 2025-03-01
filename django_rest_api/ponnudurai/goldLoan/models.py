@@ -116,12 +116,18 @@ class JoinScheme(models.Model):
 
 
 class Payment(models.Model):
+    PAYMENT_METHOD_CHOICES = (
+        ('online', 'Online'),
+        ('cash', 'Cash'),
+    )
+
     schemeCode = models.ForeignKey(JoinScheme, on_delete=models.CASCADE, related_name='payments')
     paymentDate = models.DateField(default=get_current_date)
     amountPaid = models.DecimalField(max_digits=10, decimal_places=2)
     goldAdded = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='online')
 
     def save(self, *args, **kwargs):
         is_new = not self.pk  # Check if this is a new payment

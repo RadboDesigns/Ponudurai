@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Ponnudurai Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -367,9 +367,6 @@
             </div>
 
 
-            <!-- Add this modal to your HTML template -->
-
-
 
             <div id="updatePriceModal" class="modal" style="display: none;">
                 <div class="modal-content">
@@ -386,6 +383,30 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Update Prices</button>
                     </form>
+                </div>
+            </div>
+
+            <div id="paymentOptionsModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2>Choose Payment Method</h2>
+                    <div class="payment-options">
+                        <button id="payWithCashBtn" class="btn btn-primary">Pay with Cash</button>
+                        <button id="payOnlineBtn" class="btn btn-success">Pay Online</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cash Confirmation Modal -->
+            <div id="cashConfirmationModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2>Cash Payment</h2>
+                    <p>Please collect the cash amount ₹<span id="cashAmount"></span></p>
+                    <div class="confirmation-buttons">
+                        <button id="confirmCashBtn" class="btn btn-primary">Confirm Payment</button>
+                        <button id="cancelCashBtn" class="btn btn-secondary">Cancel</button>
+                    </div>
                 </div>
             </div>
             
@@ -448,6 +469,46 @@
     .close-modal:hover {
         color: #000;
     }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        max-width: 500px;
+        border-radius: 8px;
+    }
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-modal:hover {
+        color: #000;
+    }
+    .payment-options {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+    }
+    .confirmation-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
 </style>
 
 <!-- Add this JavaScript to your HTML template -->
@@ -507,7 +568,99 @@
             alert('An error occurred while updating prices.');
         }
     });
+
+    function openPaymentModal(schemeId, amount) {
+            // Store scheme information
+            window.currentScheme = {
+                id: schemeId,
+                amount: amount
+            };
+            
+            // Show payment options modal
+            document.getElementById('paymentOptionsModal').style.display = 'block';
+        }
+        
+        // Handle cash payment option
+        document.getElementById('payWithCashBtn').addEventListener('click', function() {
+            // Hide payment options modal
+            document.getElementById('paymentOptionsModal').style.display = 'none';
+            
+            // Show cash confirmation modal
+            const cashConfirmationModal = document.getElementById('cashConfirmationModal');
+            document.getElementById('cashAmount').textContent = window.currentScheme.amount;
+            cashConfirmationModal.style.display = 'block';
+        });
+        
+        // Handle online payment option
+        document.getElementById('payOnlineBtn').addEventListener('click', function() {
+            // Hide payment options modal
+            document.getElementById('paymentOptionsModal').style.display = 'none';
+            
+            // Initiate Razorpay payment
+            initiateRazorpayPayment(window.currentScheme.id);
+        });
+        
+        // Confirm cash payment
+        document.getElementById('confirmCashBtn').addEventListener('click', function() {
+            processCashPayment(window.currentScheme.id);
+        });
+        
+        // Cancel cash payment
+        document.getElementById('cancelCashBtn').addEventListener('click', function() {
+            document.getElementById('cashConfirmationModal').style.display = 'none';
+        });
+        
+        // Close modals when clicking the X button
+        document.querySelectorAll('.close-modal').forEach(function(button) {
+            button.addEventListener('click', function() {
+                document.getElementById('paymentOptionsModal').style.display = 'none';
+                document.getElementById('cashConfirmationModal').style.display = 'none';
+            });
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('paymentOptionsModal')) {
+                document.getElementById('paymentOptionsModal').style.display = 'none';
+            }
+            if (event.target === document.getElementById('cashConfirmationModal')) {
+                document.getElementById('cashConfirmationModal').style.display = 'none';
+            }
+        });
+        
+        // Function to process cash payment
+        function processCashPayment(schemeId) {
+            fetch('{% url "process_cash_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    scheme_id: schemeId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Cash payment processed successfully!');
+                    // Close the modal
+                    document.getElementById('cashConfirmationModal').style.display = 'none';
+                    // Reload the page to update any relevant information
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the payment.');
+            });
+        }
+        
 </script>
+
+openPaymentModal
 
 
 

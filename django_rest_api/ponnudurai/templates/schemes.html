@@ -164,10 +164,10 @@
                                 <span>{{ scheme.Name }}</span>
                             </div>
                             <div class="col-lg-2">
-                                <span>{{ scheme.totalAmountPaid }}</span>
+                                <span>{{ scheme.payAmount }}</span>
                             </div>
                             <div class="col-lg-2">
-                                <span>{{ scheme.payAmount }}</span>
+                                <span>{{ scheme.totalAmountPaid }}</span>
                             </div>
                             <div class="col-lg-2">
                                 <span class="badge rounded-pill alert-success">{{ scheme.chosenPackage }}</span>
@@ -226,6 +226,31 @@
         <h2>Scheme Details</h2>
         <div id="schemeDetailsContent">
             <!-- Scheme details will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Payment Options Modal -->
+<div id="paymentOptionsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Choose Payment Method</h2>
+        <div class="payment-options">
+            <button id="payWithCashBtn" class="btn btn-primary">Pay with Cash</button>
+            <button id="payOnlineBtn" class="btn btn-success">Pay Online</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cash Confirmation Modal -->
+<div id="cashConfirmationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Cash Payment</h2>
+        <p>Please collect the cash amount ₹<span id="cashAmount"></span></p>
+        <div class="confirmation-buttons">
+            <button id="confirmCashBtn" class="btn btn-primary">Confirm Payment</button>
+            <button id="cancelCashBtn" class="btn btn-secondary">Cancel</button>
         </div>
     </div>
 </div>
@@ -288,6 +313,150 @@
         color: #000;
     }
 </style>
+
+<script>
+    // Store the selected scheme ID and amount globally
+    let currentScheme = null;
+
+    // Open the payment options modal when the "Payment" button is clicked
+    document.querySelectorAll('.payment-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const schemeId = button.getAttribute('data-scheme-id');
+            const schemeAmount = button.getAttribute('data-scheme-amount'); // Add this attribute to your button
+            currentScheme = { id: schemeId, amount: schemeAmount };
+
+            // Show the payment options modal
+            document.getElementById('paymentOptionsModal').style.display = 'block';
+        });
+    });
+
+    // Handle "Pay with Cash" button click
+    document.getElementById('payWithCashBtn').addEventListener('click', () => {
+        // Hide the payment options modal
+        document.getElementById('paymentOptionsModal').style.display = 'none';
+
+        // Show the cash confirmation modal
+        document.getElementById('cashAmount').textContent = currentScheme.amount;
+        document.getElementById('cashConfirmationModal').style.display = 'block';
+    });
+
+    // Handle "Pay Online" button click
+    document.getElementById('payOnlineBtn').addEventListener('click', () => {
+        // Hide the payment options modal
+        document.getElementById('paymentOptionsModal').style.display = 'none';
+
+        // Redirect to the Razorpay payment flow
+        initiateRazorpayPayment(currentScheme.id);
+    });
+
+    // Handle "Confirm Payment" button click for cash payment
+    document.getElementById('confirmCashBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('{% url "process_cash_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    scheme_id: currentScheme.id,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert('Cash payment processed successfully!');
+                // Close the cash confirmation modal
+                document.getElementById('cashConfirmationModal').style.display = 'none';
+                // Reload the page to reflect the updated payment
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while processing the payment.');
+        }
+    });
+
+    // Handle "Cancel" button click for cash payment
+    document.getElementById('cancelCashBtn').addEventListener('click', () => {
+        // Close the cash confirmation modal
+        document.getElementById('cashConfirmationModal').style.display = 'none';
+    });
+
+    // Close modals when clicking the X button
+    document.querySelectorAll('.close-modal').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('paymentOptionsModal').style.display = 'none';
+            document.getElementById('cashConfirmationModal').style.display = 'none';
+        });
+    });
+
+    // Close modals when clicking outside the modal
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('paymentOptionsModal')) {
+            document.getElementById('paymentOptionsModal').style.display = 'none';
+        }
+        if (event.target === document.getElementById('cashConfirmationModal')) {
+            document.getElementById('cashConfirmationModal').style.display = 'none';
+        }
+    });
+
+    // Function to initiate Razorpay payment
+    function initiateRazorpayPayment(schemeId) {
+        fetch(`/initiate-payment/${schemeId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: data.currency,
+                    order_id: data.order_id,
+                    name: "Scheme Payment",
+                    description: "Payment for the scheme",
+                    handler: async function (response) {
+                        // Handle payment success
+                        const paymentResponse = await fetch(`/payment-success/${schemeId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: new URLSearchParams({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                amount: data.amount,
+                            }),
+                        });
+
+                        const paymentData = await paymentResponse.json();
+                        if (paymentData.status === 'success') {
+                            alert('Payment successful!');
+                            location.reload(); // Reload the page to reflect the updated payment
+                        } else {
+                            alert('Payment failed: ' + paymentData.message);
+                        }
+                    },
+                    prefill: {
+                        name: "{{ request.user.username }}",
+                        email: "{{ request.user.email }}",
+                    },
+                    theme: {
+                        color: "#F37254",
+                    },
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while initiating the payment.');
+            });
+    }
+</script>
 
 
 <script>
@@ -357,58 +526,7 @@
         }
     });
 
-    document.querySelectorAll('.payment-btn').forEach(button => {
-        button.addEventListener('click', async () => {
-            const schemeId = button.getAttribute('data-scheme-id');
-
-            // Fetch payment details from the server
-            const response = await fetch(`/initiate-payment/${schemeId}/`);
-            const data = await response.json();
-
-            // Initialize Razorpay payment
-            const options = {
-                key: data.key,
-                amount: data.amount,
-                currency: data.currency,
-                order_id: data.order_id,
-                name: "Scheme Payment",
-                description: "Payment for the scheme",
-                handler: async function (response) {
-                    // Handle payment success
-                    const paymentResponse = await fetch(`/payment-success/${schemeId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': '{{ csrf_token }}',
-                        },
-                        body: new URLSearchParams({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            amount: data.amount,
-                        }),
-                    });
-
-                    const paymentData = await paymentResponse.json();
-                    if (paymentData.status === 'success') {
-                        alert('Payment successful!');
-                        location.reload(); // Reload the page to reflect the updated payment
-                    } else {
-                        alert('Payment failed: ' + paymentData.message);
-                    }
-                },
-                prefill: {
-                    name: "{{ request.user.username }}",
-                    email: "{{ request.user.email }}",
-                },
-                theme: {
-                    color: "#F37254",
-                },
-            };
-
-            const rzp = new Razorpay(options);
-            rzp.open();
-        });
-    });
+    
 
     // Get the modal and button elements
     const schemeDetailsModal = document.getElementById('schemeDetailsModal');
