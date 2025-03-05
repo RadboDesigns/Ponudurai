@@ -121,13 +121,31 @@ class Payment(models.Model):
         ('cash', 'Cash'),
     )
 
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    )
+
     schemeCode = models.ForeignKey(JoinScheme, on_delete=models.CASCADE, related_name='payments')
     paymentDate = models.DateField(default=get_current_date)
     amountPaid = models.DecimalField(max_digits=10, decimal_places=2)
     goldAdded = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
-    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_order_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True, 
+        blank=True, 
+        verbose_name='Razorpay Payment ID'
+    )
+    signature = models.CharField(max_length=500, blank=True, null=True)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='online')
+    status = models.CharField(
+        max_length=20, 
+        choices=PAYMENT_STATUS_CHOICES, 
+        default='pending'
+    )
 
     def save(self, *args, **kwargs):
         is_new = not self.pk  # Check if this is a new payment
@@ -145,7 +163,6 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment for {self.schemeCode.schemeCode} on {self.paymentDate}"
-    
 
 class Feeds(models.Model):
     feedsTitle = models.CharField(max_length=125)

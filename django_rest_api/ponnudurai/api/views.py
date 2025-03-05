@@ -1,3 +1,4 @@
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from rest_framework import generics, permissions
 from .serializers import *
 from goldLoan.models import *
@@ -10,9 +11,43 @@ from django.conf import settings
 import razorpay
 import requests
 from requests.exceptions import RequestException, Timeout
+import logging
+from django.db import transaction
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 
+
+
+class UserPaymentsView(APIView):
+    def get(self, request, *args, **kwargs):
+        phone_number = request.query_params.get('phone')
+
+        if not phone_number:
+            return Response({
+                "status": "error",
+                "message": "Phone number is required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch all schemes for the given phone number
+            schemes = JoinScheme.objects.filter(phone__phone_number=phone_number)
+            
+            # Fetch all payments for the fetched schemes
+            payments = Payment.objects.filter(schemeCode__in=schemes).order_by('-paymentDate')
+            
+            # Serialize the payment data
+            serializer = PaymentSerializer(payments, many=True)
+            
+            return Response({
+                "status": "success",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -61,6 +96,7 @@ class CreateRazorpayOrderView(APIView):
                 "message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+logger = logging.getLogger(__name__)
 
 class HandlePaymentSuccessView(APIView):
     def post(self, request, *args, **kwargs):
@@ -70,66 +106,101 @@ class HandlePaymentSuccessView(APIView):
         signature = request.data.get('signature')
         amount = request.data.get('amount')  # Amount in paise
 
+        logger.info(f"Payment processing started: Scheme {scheme_code}, Amount {amount}")
+
         if not all([scheme_code, payment_id, order_id, signature, amount]):
+            logger.error("Missing required payment fields")
             return Response({
                 "status": "error",
                 "message": "All fields are required"
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Fetch the scheme
-            scheme = JoinScheme.objects.get(schemeCode=scheme_code)
+            # Use a transaction to ensure atomicity
+            with transaction.atomic():
+                # Check if a payment with the same payment_id already exists
+                if Payment.objects.filter(razorpay_payment_id=payment_id).exists():
+                    logger.warning(f"Duplicate payment detected: {payment_id}")
+                    return Response({
+                        "status": "error",
+                        "message": "Payment already processed"
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Fetch the latest gold price
-            latest_price = LivePrice.objects.first()
-            if not latest_price:
+                # Fetch the scheme
+                scheme = JoinScheme.objects.get(schemeCode=scheme_code)
+
+                # Fetch the latest gold price
+                latest_price = LivePrice.objects.first()
+                if not latest_price:
+                    logger.error("No gold price available")
+                    return Response({
+                        "status": "error",
+                        "message": "Gold price not available"
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                # Explicit conversion and handling of amount
+                try:
+                    # Convert amount from paise to rupees, ensuring precise conversion
+                    amount_in_rupees = Decimal(str(float(amount) / 100)).quantize(
+                        Decimal('0.01'), 
+                        rounding=ROUND_HALF_UP
+                    )
+                    
+                    # Convert gold price to Decimal for calculation
+                    gold_price = Decimal(str(latest_price.gold_price))
+                    
+                    # Calculate gold added
+                    gold_added = (amount_in_rupees / gold_price).quantize(
+                        Decimal('0.0001'), 
+                        rounding=ROUND_HALF_UP
+                    )
+
+                except (TypeError, ValueError, InvalidOperation) as e:
+                    logger.error(f"Amount calculation error: {str(e)}")
+                    return Response({
+                        "status": "error",
+                        "message": f"Error in amount calculation: {str(e)}"
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                # Create a payment record
+                payment = Payment.objects.create(
+                    schemeCode=scheme,
+                    razorpay_payment_id=payment_id,
+                    razorpay_order_id=order_id,
+                    signature=signature,
+                    amountPaid=amount_in_rupees,
+                    goldAdded=gold_added,
+                    status='success',
+                    payment_method='online'
+                )
+
+                # Update scheme details ONLY ONCE
+                # Use the save() method of the Payment model to handle scheme updates
+                payment.save()
+
+                logger.info(f"Payment processed successfully: Scheme {scheme_code}, Amount {amount_in_rupees}")
+
                 return Response({
-                    "status": "error",
-                    "message": "Gold price not available"
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            # Convert amount from paise to rupees
-            amount_in_rupees = float(amount) / 100
-
-            # Calculate gold added
-            gold_added = round(amount_in_rupees / latest_price.gold_price, 4)
-
-            # Create a payment record
-            payment = Payment.objects.create(
-                schemeCode=scheme,
-                paymentId=payment_id,
-                orderId=order_id,
-                signature=signature,
-                amount=amount_in_rupees,
-                goldAdded=gold_added,
-                status='success'
-            )
-
-            # Update scheme details
-            scheme.NumberOfTimesPaid += 1
-            scheme.totalAmountPaid += amount_in_rupees
-            scheme.totalGold += gold_added
-            scheme.save()
-
-            return Response({
-                "status": "success",
-                "message": "Payment saved successfully",
-                "data": {
-                    "payment_id": payment.id,
-                    "scheme_code": scheme.schemeCode,
-                    "amount_paid": amount_in_rupees,
-                    "gold_added": gold_added,
-                    "total_gold": scheme.totalGold,
-                    "total_amount_paid": scheme.totalAmountPaid
-                }
-            }, status=status.HTTP_200_OK)
+                    "status": "success",
+                    "message": "Payment saved successfully",
+                    "data": {
+                        "payment_id": payment.id,
+                        "scheme_code": scheme.schemeCode,
+                        "amount_paid": float(amount_in_rupees),
+                        "gold_added": float(gold_added),
+                        "total_gold": float(scheme.totalGold),
+                        "total_amount_paid": float(scheme.totalAmountPaid)
+                    }
+                }, status=status.HTTP_200_OK)
 
         except JoinScheme.DoesNotExist:
+            logger.error(f"Invalid scheme code: {scheme_code}")
             return Response({
                 "status": "error",
                 "message": "Invalid scheme code"
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            logger.error(f"Unexpected error during payment: {str(e)}")
             return Response({
                 "status": "error",
                 "message": str(e)

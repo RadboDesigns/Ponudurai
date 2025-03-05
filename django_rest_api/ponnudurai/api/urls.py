@@ -25,6 +25,8 @@ urlpatterns = [
 
     path('updateFeeds/', updateFeedsView.as_view(), name='update_feeds_view'),
     path('Feeds/', updateFeedsView.as_view(), name='update_feeds_view'),
+
+    path('user-payments/', UserPaymentsView.as_view(), name='user-payments'),
     
 ]         
 

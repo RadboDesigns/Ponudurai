@@ -6,6 +6,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class PaymentSerializer(serializers.ModelSerializer):
+    schemeCode = serializers.CharField(source='schemeCode.schemeCode')
+    customer_name = serializers.CharField(source='schemeCode.Name')
+    payment_method = serializers.CharField(source='get_payment_method_display')
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'schemeCode', 'customer_name', 'paymentDate', 
+            'amountPaid', 'goldAdded', 'payment_method', 'status'
+        ]
+
 
 class UserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(required=True)
