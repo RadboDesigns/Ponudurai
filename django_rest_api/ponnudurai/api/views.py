@@ -360,45 +360,54 @@ class SchemePaymentsView(generics.ListAPIView):
         
         
         #End Of Payment
-
+User = get_user_model()
 
 class LoginView(APIView):
     def post(self, request):
         phone = request.data.get('phone')
         password = request.data.get('password')
+        
+        if not phone or not password:
+            return Response({
+                'error': 'Phone number and password are required'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Make sure to use the correct field name that matches your User model
             user = User.objects.get(phone_number=phone)
-            if check_password(password, user.password):  # Verify password
+            
+            if check_password(password, user.password):
+                # Return user data on successful login
                 return Response({
-                    'exists': True,
                     'user_id': user.id,
-                    'phone_number': user.phone_number
+                    'phone_number': user.phone_number,
+                    'name': user.get_full_name() if hasattr(user, 'get_full_name') else '',
+                    # Add any other user data you need
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({
-                    'exists': False,
                     'error': 'Invalid password'
                 }, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({
-                'exists': False,
                 'error': 'User not found'
             }, status=status.HTTP_404_NOT_FOUND)
 
+
+# views.py - Replace CheckUserView with this implementation
 class CheckUserView(APIView):
     def post(self, request):
         email = request.data.get('email')
-        password = request.data.get('password')
-
-        try:
-            user = User.objects.get(email=email)
-            if user.check_password(password):  # Verify password
-                return Response({'exists': True}, status=status.HTTP_200_OK)
-            else:
-                return Response({'exists': False, 'error': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
-        except User.DoesNotExist:
-            return Response({'exists': False, 'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        phone_number = request.data.get('phone_number')
+        
+        email_exists = User.objects.filter(email=email).exists() if email else False
+        phone_exists = User.objects.filter(phone_number=phone_number).exists() if phone_number else False
+        
+        return Response({
+            'email_exists': email_exists,
+            'phone_exists': phone_exists
+        }, status=status.HTTP_200_OK)
+        
 
 @api_view(['GET'])
 def check_existing_user(request):
@@ -431,7 +440,6 @@ class UserView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save()
-#              Scheme
 
 class JoinSchemeListCreateView(generics.ListCreateAPIView):
     queryset = JoinScheme.objects.all()

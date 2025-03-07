@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Ponnudurai Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,6 +38,11 @@
                 <li class="menu-item active">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text"  style="color: #fff !important;">Schemes</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text" style="color: #fff !important;">Transactions</span>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -132,7 +137,13 @@
                             </select>
                         </div>
                         <div class="col-md-2 col-6">
-                            <input type="date" id="dateFilter" class="form-control">
+                            <input type="date" id="startDateFilter" class="form-control" placeholder="Start Date">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="date" id="endDateFilter" class="form-control" placeholder="End Date">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" id="schemeCodeFilter" class="form-control" placeholder="Scheme Code">
                         </div>
                         <div class="col-md-2 col-6">
                             <button class="btn btn-primary" id="applyFilter">Apply Filter</button>
@@ -238,6 +249,7 @@
         <div class="payment-options">
             <button id="payWithCashBtn" class="btn btn-primary">Pay with Cash</button>
             <button id="payOnlineBtn" class="btn btn-success">Pay Online</button>
+            <button id="payWithPOC" class="btn btn-primary">Pay Using Card</button>
         </div>
     </div>
 </div>
@@ -251,6 +263,18 @@
         <div class="confirmation-buttons">
             <button id="confirmCashBtn" class="btn btn-primary">Confirm Payment</button>
             <button id="cancelCashBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="cardConfirmationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Card Payment</h2>
+        <p>Please process card payment for ₹<span id="cardAmount"></span></p>
+        <div class="confirmation-buttons">
+            <button id="confirmCardBtn" class="btn btn-primary">Confirm Card Payment</button>
+            <button id="cancelCardBtn" class="btn btn-secondary">Cancel</button>
         </div>
     </div>
 </div>
@@ -340,6 +364,15 @@
         document.getElementById('cashConfirmationModal').style.display = 'block';
     });
 
+    document.getElementById('payWithPOC').addEventListener('click', () => {
+    // Hide the payment options modal
+        document.getElementById('paymentOptionsModal').style.display = 'none';
+
+        // Show the card confirmation modal
+        document.getElementById('cardAmount').textContent = currentScheme.amount;
+        document.getElementById('cardConfirmationModal').style.display = 'block';
+    });
+
     // Handle "Pay Online" button click
     document.getElementById('payOnlineBtn').addEventListener('click', () => {
         // Hide the payment options modal
@@ -393,6 +426,63 @@
             document.getElementById('cashConfirmationModal').style.display = 'none';
         });
     });
+
+    document.getElementById('confirmCardBtn').addEventListener('click', async () => {
+    try {
+        const response = await fetch('{% url "process_card_payment" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                scheme_id: currentScheme.id,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            alert('Card payment processed successfully!');
+            // Close the card confirmation modal
+            document.getElementById('cardConfirmationModal').style.display = 'none';
+            // Reload the page to reflect the updated payment
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while processing the payment.');
+    }
+});
+
+document.getElementById('cancelCardBtn').addEventListener('click', () => {
+    // Close the card confirmation modal
+    document.getElementById('cardConfirmationModal').style.display = 'none';
+});
+
+// Update modal close handlers
+document.querySelectorAll('.close-modal').forEach(button => {
+    button.addEventListener('click', () => {
+        document.getElementById('paymentOptionsModal').style.display = 'none';
+        document.getElementById('cashConfirmationModal').style.display = 'none';
+        document.getElementById('cardConfirmationModal').style.display = 'none';
+    });
+});
+
+// Update window click event to include card modal
+window.addEventListener('click', (event) => {
+    if (event.target === document.getElementById('paymentOptionsModal')) {
+        document.getElementById('paymentOptionsModal').style.display = 'none';
+    }
+    if (event.target === document.getElementById('cashConfirmationModal')) {
+        document.getElementById('cashConfirmationModal').style.display = 'none';
+    }
+    if (event.target === document.getElementById('cardConfirmationModal')) {
+        document.getElementById('cardConfirmationModal').style.display = 'none';
+    }
+});
 
     // Close modals when clicking outside the modal
     window.addEventListener('click', (event) => {
@@ -462,12 +552,16 @@
 <script>
     document.getElementById('applyFilter').addEventListener('click', () => {
         const category = document.getElementById('categoryFilter').value;
-        const date = document.getElementById('dateFilter').value;
+        const startDate = document.getElementById('startDateFilter').value;
+        const endDate = document.getElementById('endDateFilter').value;
+        const schemeCode = document.getElementById('schemeCodeFilter').value;
 
         // Redirect to the filtered URL
         let url = `{% url 'scheme_list' %}?`;
         if (category) url += `category=${category}&`;
-        if (date) url += `date=${date}`;
+        if (startDate) url += `start_date=${startDate}&`;
+        if (endDate) url += `end_date=${endDate}&`;
+        if (schemeCode) url += `scheme_code=${schemeCode}`;
 
         window.location.href = url;
     });

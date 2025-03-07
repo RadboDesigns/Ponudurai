@@ -26,6 +26,7 @@ class User(AbstractUser):
         null=True,       # Allow NULL in the database
         blank=True,      # Allow blank values in forms
     )
+    supabase_uid = models.CharField(max_length=255, null=True, blank=True)
 
     # Override the save method
     def save(self, *args, **kwargs):
@@ -119,6 +120,7 @@ class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = (
         ('online', 'Online'),
         ('cash', 'Cash'),
+        ('poc', 'POC'),
     )
 
     PAYMENT_STATUS_CHOICES = (

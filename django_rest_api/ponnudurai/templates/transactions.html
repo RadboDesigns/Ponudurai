@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Ponnudurai Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,6 +40,11 @@
                         <span class="text" style="color: #fff !important;">Schemes</span>
                     </a>
                 </li>
+                <li class="menu-item active">
+                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text" style="color: #fff !important;">Transactions</span>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'show_feeds' %}"> <i class="icon material-icons md-add_box"></i>
                         <span class="text" style="color: #fff !important;">Show Feeds</span>
@@ -50,11 +55,7 @@
                         <span class="text" style="color: #fff !important;">Users</span>
                     </a>
                 </li>
-                <li class="menu-item active">
-                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
-                        <span class="text" style="color: #fff !important;">Transactions</span>
-                    </a>
-                </li>
+                
                 {% if request.user.is_super_user %}
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
@@ -122,18 +123,28 @@
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-9">
+                        <div class="col-lg-12">
                             <header class="border-bottom mb-4 pb-4">
                                 <div class="row">
-                                    <div class="col-lg-5 col-6 me-auto">
-                                        <input type="text" placeholder="Search..." class="form-control">
+                                    <div class="col-lg-3 col-6">
+                                        <input type="date" id="startDateFilter" class="form-control" placeholder="Start Date">
                                     </div>
-                                    <div class="col-lg-2 col-6">
-                                        <select class="form-select">
-                                            <option>All Payments</option>
-                                            <option>Razorpay</option>
-                                            <option>Others</option>
+                                    <div class="col-lg-3 col-6">
+                                        <input type="date" id="endDateFilter" class="form-control" placeholder="End Date">
+                                    </div>
+                                    <div class="col-lg-3 col-6">
+                                        <select class="form-select" id="paymentMethodFilter">
+                                            <option value="">All Payment Methods</option>
+                                            <option value="online">Online</option>
+                                            <option value="cash">Cash</option>
+                                            <option value="poc">POC</option>
                                         </select>
+                                    </div>
+                                    <div class="col-lg-3 col-6">
+                                        <input type="text" id="schemeCodeFilter" class="form-control" placeholder="Scheme Code">
+                                    </div>
+                                    <div class="col-lg-3 col-6 mt-3">
+                                        <button class="btn btn-primary" id="applyFilter">Apply Filter</button>
                                     </div>
                                 </div>
                             </header> <!-- card-header end// -->
@@ -146,7 +157,7 @@
                                             <th>Amount Paid</th>
                                             <th>Gold Added (g)</th>
                                             <th>Payment Date</th>
-                                            <th class="text-end">Action</th>
+                                            <th class="text-end">Payment Method</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -157,13 +168,12 @@
                                             <td>₹{{ payment.amountPaid }}</td>
                                             <td>{{ payment.goldAdded }} g</td>
                                             <td>{{ payment.paymentDate|date:"d.m.Y" }}</td>
-                                            <td class="text-end">
-                                                <a href="{% url 'payment_detail' payment.id %}" class="btn btn-sm btn-light font-sm rounded">Details</a>
-                                            </td>
+                                            <td class="text-end">{{ payment.get_payment_method_display }}</td>
+                                            
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="6" class="text-center">No payments found</td>
+                                            <td colspan="7" class="text-center">No payments found</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -198,28 +208,7 @@
                             </div>
                         </div> <!-- col end// -->
                         
-                        <aside class="col-lg-3">
-                            <div class="box bg-light" style="min-height:80%">
-                                <h6 class="mt-15">Transaction Summary</h6>
-                                <hr>
-                                <h6 class="mb-0">Total Transactions:</h6>
-                                <p>{{ payment_count }}</p><br>
-                                <h6 class="mb-0">Total Amount:</h6>
-                                <p>₹{{ total_amount }}</p><br>
-                                <h6 class="mb-0">Total Gold Added:</h6>
-                                <p>{{ total_gold }} g</p><br>
-                                <h6 class="mb-0">Latest Payment:</h6>
-                                <p>{{ latest_payment.paymentDate|date:"F d, Y" }}</p><br>
-                                <h6 class="mb-0">Payment Statistics</h6><br>
-                                <p>
-                                    <strong>Today:</strong> ₹{{ today_total }}<br>
-                                    <strong>This Week:</strong> ₹{{ week_total }}<br>
-                                    <strong>This Month:</strong> ₹{{ month_total }}
-                                </p>
-                                <hr>
-                                <a class="btn btn-light" href="{% url 'export_payments' %}"> Download Report </a>
-                            </div>
-                        </aside> <!-- col end// -->
+                        
                     </div> <!-- row end// -->
                 </div> <!-- card-body // -->
             </div> <!-- card end// -->
@@ -229,7 +218,7 @@
                 <div class="col-sm-6">
                     <script>
                     document.write(new Date().getFullYear())
-                    </script> ©, Evara - HTML Ecommerce Template .
+                    </script> ©, Radbo Designs - HTML Ecommerce Template .
                 </div>
                 <div class="col-sm-6">
                     <div class="text-sm-end">
@@ -246,6 +235,22 @@
     <script src="../static/assets/js/vendors/jquery.fullscreen.min.js"></script>
     <!-- Main Script -->
     <script src="../static/assets/js/main.js" type="text/javascript"></script>
+    <script>
+        document.getElementById('applyFilter').addEventListener('click', () => {
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const paymentMethod = document.getElementById('paymentMethodFilter').value;
+            const schemeCode = document.getElementById('schemeCodeFilter').value;
+
+            let url = `{% url 'show_transation' %}?`;
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (paymentMethod) url += `payment_method=${paymentMethod}&`;
+            if (schemeCode) url += `scheme_code=${schemeCode}`;
+
+            window.location.href = url;
+        });
+    </script>
 </body>
 
 </html>

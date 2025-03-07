@@ -1,3 +1,4 @@
+import calendar
 import os
 from pyexpat.errors import messages
 from django.shortcuts import render, get_object_or_404
@@ -23,6 +24,8 @@ import json
 from django.views.decorators.http import require_POST
 from rest_framework import generics
 from .tasks import update_live_prices
+from django.utils import timezone
+from datetime import datetime
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 User = get_user_model()
@@ -305,22 +308,135 @@ def dashboard(request):
         messages.error(request, 'You do not have permission to access this page.')
         return redirect('login')
     
-    # Get latest prices outside the if condition
+    # Get latest prices
     latest_prices = LivePrice.objects.order_by('-timestamp').first()
-    return render(request, 'index.html', {'latest_prices': latest_prices})
+    
+    # Calculate new customers count for the last month
+    
+    User = get_user_model()
+    
+    # Get the first day of the current month
+    today = timezone.now()
+    first_day_current_month = today.replace(day=1)
+    
+    # Calculate the first day of the previous month
+    if first_day_current_month.month == 1:  # January
+        prev_month = 12  # December
+        prev_year = first_day_current_month.year - 1
+    else:
+        prev_month = first_day_current_month.month - 1
+        prev_year = first_day_current_month.year
+    
+    # Get the last day of the previous month
+    last_day_prev_month = first_day_current_month - timedelta(days=1)
+    
+    # Calculate the first day of the previous month
+    first_day_prev_month = last_day_prev_month.replace(day=1)
+    
+    # Query for new customers joined in the previous month
+    new_customers_count = User.objects.filter(
+        date_joined__gte=first_day_prev_month,
+        date_joined__lte=last_day_prev_month,
+        is_superuser=False,  # Exclude admin users
+        is_staff=False       # Exclude staff users
+    ).count()
+    
+    # Get the month name for display
+    prev_month_name = calendar.month_name[prev_month]
+    
+    return render(request, 'index.html', {
+        'latest_prices': latest_prices,
+        'new_customers_count': new_customers_count,
+        'prev_month_name': prev_month_name
+    })
 
 def scheme_list(request):
-    category = request.GET.get('category')
-    date = request.GET.get('date')
-
     schemes = JoinScheme.objects.all()
+
+    # Apply filters based on query parameters
+    category = request.GET.get('category')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    scheme_code = request.GET.get('scheme_code')
 
     if category:
         schemes = schemes.filter(chosenPackage=category)
-    if date:
-        schemes = schemes.filter(joiningDate=date)
 
-    return render(request, 'schemes.html', {'schemes': schemes})
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        schemes = schemes.filter(joiningDate__gte=start_date)
+
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        schemes = schemes.filter(joiningDate__lte=end_date)
+
+    if scheme_code:
+        schemes = schemes.filter(schemeCode__icontains=scheme_code)
+
+    context = {
+        'schemes': schemes,
+    }
+
+    return render(request, 'schemes.html', context)
+
+def process_card_payment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            scheme_id = data.get('scheme_id')
+            
+            # Get the scheme
+            scheme = JoinScheme.objects.get(id=scheme_id)
+            
+            # Get the current gold price from LivePrice model
+            try:
+                # Get the most recent gold price (first one due to ordering in Meta)
+                current_price = LivePrice.objects.first()
+                if not current_price:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Current gold price not available.'
+                    })
+                gold_price = current_price.gold_price
+            except LivePrice.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Gold price information not available.'
+                })
+            
+            # Calculate gold added based on current gold price and round to 4 decimal places
+            gold_added = round(float(scheme.payAmount) / float(gold_price), 4)
+            
+            # Create payment with payment_method='poc'
+            payment = Payment.objects.create(
+                schemeCode=scheme,
+                amountPaid=scheme.payAmount,
+                goldAdded=gold_added,
+                payment_method='poc',  # Set payment method to 'poc' for card payments
+                status='success'
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Card payment processed successfully.'
+            })
+            
+        except JoinScheme.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Scheme not found.'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method.'
+    })
+
 
 def show_feeds(request):
     feeds = Feeds.objects.all()
@@ -371,10 +487,51 @@ def add_users(request):
     pass
 
 def show_transation(request):
-    transation = Payment.objects.all()
-    return render(request, 'transactions.html', {'transaction': transation})
+    payments = Payment.objects.filter(status='success').order_by('-paymentDate', '-id')
 
+    # Apply filters based on query parameters
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    payment_method = request.GET.get('payment_method')
+    scheme_code = request.GET.get('scheme_code')
 
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        payments = payments.filter(paymentDate__gte=start_date)
+
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        payments = payments.filter(paymentDate__lte=end_date)
+
+    if payment_method:
+        payments = payments.filter(payment_method=payment_method)
+
+    if scheme_code:
+        payments = payments.filter(schemeCode__schemeCode__icontains=scheme_code)
+
+    # Calculate summary data
+    payment_count = payments.count()
+    total_amount = sum(payment.amountPaid for payment in payments)
+    total_gold = sum(payment.goldAdded for payment in payments)
+    latest_payment = payments.order_by('-paymentDate').first()
+
+    # Calculate today's, this week's, and this month's totals
+    today_total = sum(payment.amountPaid for payment in payments.filter(paymentDate=datetime.today().date()))
+    week_total = sum(payment.amountPaid for payment in payments.filter(paymentDate__week=datetime.today().isocalendar()[1]))
+    month_total = sum(payment.amountPaid for payment in payments.filter(paymentDate__month=datetime.today().month))
+
+    context = {
+        'payments': payments,
+        'payment_count': payment_count,
+        'total_amount': total_amount,
+        'total_gold': total_gold,
+        'latest_payment': latest_payment,
+        'today_total': today_total,
+        'week_total': week_total,
+        'month_total': month_total,
+    }
+
+    return render(request, 'transactions.html', context)
 
 logger = logging.getLogger(__name__)
 

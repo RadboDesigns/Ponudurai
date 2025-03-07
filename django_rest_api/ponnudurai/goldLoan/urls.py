@@ -14,7 +14,8 @@ urlpatterns = [
     path('initiate-payment/<int:scheme_id>/', views.initiate_payment, name='initiate_payment'),
     path('payment-success/<int:scheme_id>/', views.payment_success, name='payment_success'),
     path('process-cash-payment/', views.process_cash_payment, name='process_cash_payment'),
-
+    path('process-card-payment/', views.process_card_payment, name='process_card_payment'),
+    
     path('schemes/', views.scheme_list, name='scheme_list'),
     path('create-scheme/', views.create_scheme, name='create_scheme'),
     path('scheme-details/<int:scheme_id>/', views.scheme_details, name='scheme_details'),

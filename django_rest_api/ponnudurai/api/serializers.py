@@ -24,10 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
+    supabase_uid = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'phone_number', 'password')
+        fields = ('id', 'username', 'email', 'phone_number', 'password', 'supabase_uid')
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -40,6 +41,12 @@ class UserSerializer(serializers.ModelSerializer):
             phone_number=validated_data['phone_number'],
             password=validated_data['password']  # Django will hash this automatically
         )
+        
+        # Save Supabase UID if provided
+        if 'supabase_uid' in validated_data:
+            user.supabase_uid = validated_data['supabase_uid']
+            user.save()
+            
         return user
     
 class DateFieldWithoutTime(serializers.Field):
