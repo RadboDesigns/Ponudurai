@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE HTML>
 <html lang="en">
 
@@ -22,7 +23,8 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="index.html" class="brand-wrap">
-                <img src="../static/assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+                <!-- ../static/assets/imgs/theme/logo.svg -->
+                <img src="{% static 'assets/imgs/theme/logo.svg' %}" class="logo" alt="Evara Dashboard">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -47,12 +49,12 @@
                 </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'show_feeds' %}"> <i class="icon material-icons md-add_box"></i>
-                        <span class="text"  style="color: #fff !important;">Show Feeds</span>
+                        <span class="text" style="color: #fff !important;">Show Feeds</span>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
-                        <span class="text"  style="color: #fff !important;">Users</span>
+                        <span class="text" style="color: #fff !important;">Users</span>
                     </a>
                 </li>
                 {% if request.user.is_super_user %}
@@ -68,8 +70,10 @@
                     </a>
                 </li>
             </ul>
+            <hr>
             <br>
             <br>
+            <div style="text-align: center; color: #fff">© 2025 Powered by <span style="color: #FFD700;">Radbo Designs</span></div>
         </nav>
     </aside>
     <main class="main-wrap">

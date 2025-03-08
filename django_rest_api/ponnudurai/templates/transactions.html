@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE HTML>
 <html lang="en">
 
@@ -22,7 +23,8 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="index.html" class="brand-wrap">
-                <img src="../static/assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+                <!-- ../static/assets/imgs/theme/logo.svg -->
+                <img src="{% static 'assets/imgs/theme/logo.svg' %}" class="logo" alt="Evara Dashboard">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -30,14 +32,14 @@
         </div>
         <nav>
             <ul class="menu-aside">
-                <li class="menu-item ">
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'dashboard' %}"> <i class="icon material-icons md-home"></i>
-                        <span class="text" style="color: #fff !important;">Dashboard</span>
+                        <span class="text"  style="color: #fff !important;">Dashboard</span>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
-                        <span class="text" style="color: #fff !important;">Schemes</span>
+                        <span class="text"  style="color: #fff !important;">Schemes</span>
                     </a>
                 </li>
                 <li class="menu-item active">
@@ -55,7 +57,6 @@
                         <span class="text" style="color: #fff !important;">Users</span>
                     </a>
                 </li>
-                
                 {% if request.user.is_super_user %}
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
@@ -69,8 +70,10 @@
                     </a>
                 </li>
             </ul>
+            <hr>
             <br>
             <br>
+            <div style="text-align: center; color: #fff">© 2025 Powered by <span style="color: #FFD700;">Radbo Designs</span></div>
         </nav>
     </aside>
     <main class="main-wrap">

@@ -21,7 +21,7 @@
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
-            <a href="{% url 'dashboard' %}" class="brand-wrap">
+            <a href="index.html" class="brand-wrap">
                 <!-- ../static/assets/imgs/theme/logo.svg -->
                 <img src="{% static 'assets/imgs/theme/logo.svg' %}" class="logo" alt="Evara Dashboard">
             </a>
@@ -31,14 +31,14 @@
         </div>
         <nav>
             <ul class="menu-aside">
-                <li class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <li class="menu-item active">
                     <a class="menu-link" href="{% url 'dashboard' %}"> <i class="icon material-icons md-home"></i>
-                        <span class="text" style="color: #fff !important;">Dashboard</span>
+                        <span class="text"  style="color: #fff !important;">Dashboard</span>
                     </a>
                 </li>
-                <li class="menu-item {% if request.resolver_match.url_name == 'scheme_list' %}active{% endif %}">
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
-                        <span class="text" style="color: #fff !important;">Schemes</span>
+                        <span class="text"  style="color: #fff !important;">Schemes</span>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -46,18 +46,18 @@
                         <span class="text" style="color: #fff !important;">Transactions</span>
                     </a>
                 </li>
-                <li class="menu-item {% if request.resolver_match.url_name == 'show_feeds' %}active{% endif %}">
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'show_feeds' %}"> <i class="icon material-icons md-add_box"></i>
                         <span class="text" style="color: #fff !important;">Show Feeds</span>
                     </a>
                 </li>
-                <li class="menu-item {% if request.resolver_match.url_name == 'show_users' %}active{% endif %}">
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
                         <span class="text" style="color: #fff !important;">Users</span>
                     </a>
                 </li>
                 {% if request.user.is_super_user %}
-                <li class="menu-item {% if request.resolver_match.url_name == 'admin_user_management' %}active{% endif %}">
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
                         <span class="text" style="color: #fff !important;">Admin Users</span>
                     </a>
@@ -72,6 +72,7 @@
             <hr>
             <br>
             <br>
+            <div style="text-align: center; color: #fff">© 2025 Powered by <span style="color: #FFD700;">Radbo Designs</span></div>
         </nav>
     </aside>
     <main class="main-wrap">
