@@ -1,0 +1,19 @@
+<!-- add_users.html -->
+{% extends 'base.html' %}  <!-- Assuming you have a base template -->
+
+{% block content %}
+<div class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Add New User</h2>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

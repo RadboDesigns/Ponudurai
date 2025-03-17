@@ -26,6 +26,8 @@ from rest_framework import generics
 from .tasks import update_live_prices
 from django.utils import timezone
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
+from .forms import UserForm
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 User = get_user_model()
@@ -280,21 +282,34 @@ def create_scheme(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 @csrf_exempt
-def update_live_price(request):
+def update_live_price_manual(request):
     if request.method == 'POST':
-        gold_price = request.POST.get('gold_price')
-        silver_price = request.POST.get('silver_price')
+        try:
+            gold_price = request.POST.get('gold_price')
+            silver_price = request.POST.get('silver_price')
 
-        if gold_price and silver_price:
-            # Create a new LivePrice entry
-            LivePrice.objects.create(
-                gold_price=gold_price,
-                silver_price=silver_price,
-                timestamp=timezone.now()
-            )
-            return JsonResponse({'status': 'success', 'message': 'Prices updated successfully!'})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid data provided.'}, status=400)
+            if gold_price and silver_price:
+                try:
+                    # Convert to Decimal to ensure proper type
+                    gold_price = Decimal(gold_price)
+                    silver_price = Decimal(silver_price)
+                    
+                    # Create a new LivePrice entry
+                    LivePrice.objects.create(
+                        gold_price=gold_price,
+                        silver_price=silver_price,
+                        timestamp=timezone.now()
+                    )
+                    return JsonResponse({'status': 'success', 'message': 'Prices updated successfully!'})
+                except (ValueError, InvalidOperation, TypeError) as e:
+                    # Handle conversion errors
+                    return JsonResponse({'status': 'error', 'message': f'Invalid number format: {str(e)}'}, status=400)
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Gold price and silver price are required.'}, status=400)
+        except Exception as e:
+            # Log the exception for debugging
+            print(f"Error in update_live_price: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': 'Server error occurred.'}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
@@ -484,7 +499,14 @@ def show_users(request):
     return render(request, 'users.html', {'users': users})
 
 def add_users(request):
-    pass
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('show_users')  # Redirect to the user list page after creation
+    else:
+        form = UserForm()
+    return render(request, 'add_users.html', {'form': form})
 
 def show_transation(request):
     payments = Payment.objects.filter(status='success').order_by('-paymentDate', '-id')
@@ -607,3 +629,21 @@ def price_history(request):
     return render(request, 'goldLoan/price_history.html', {
         'history': history
     })
+
+
+
+def home(request):
+    return render(request, 'home.html')
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+def about_us(request):
+    return render(request, 'about_us.html')
+
+
+def terms_conditions(request):
+    return render(request, 'terms_condition.html')
+
+def contact(request):
+    return render(request, 'contact_us.html')

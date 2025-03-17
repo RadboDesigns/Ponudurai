@@ -37,6 +37,11 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
+                        <span class="text" style="color: #fff !important;">Users</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text"  style="color: #fff !important;">Schemes</span>
                     </a>
@@ -51,11 +56,6 @@
                         <span class="text" style="color: #fff !important;">Show Feeds</span>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
-                        <span class="text" style="color: #fff !important;">Users</span>
-                    </a>
-                </li>
                 {% if request.user.is_super_user %}
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
@@ -63,6 +63,26 @@
                     </a>
                 </li>
                 {% endif %}
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'about_us' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">About Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'contact' %}"> <i class="icon material-icons md-contact_mail "></i>
+                        <span class="text" style="color: #fff !important;">Contact Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'privacy_policy' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">Privacy Policy</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'terms_conditions' %}"> <i class="icon material-icons md-privacy_tip"></i>
+                        <span class="text" style="color: #fff !important;">Terms and Conditions</span>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'logout' %}"> <i class="icon material-icons md-exit_to_app"></i>
                         <span class="text" style="color: #fff !important;">Logout</span>
@@ -94,12 +114,6 @@
             <div class="col-nav">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
                 <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
-                            <i class="material-icons md-notifications animation-shake"></i>
-                            <span class="badge rounded-pill">3</span>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                     </li>

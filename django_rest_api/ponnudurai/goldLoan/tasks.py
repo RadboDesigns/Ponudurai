@@ -12,7 +12,7 @@ def update_live_prices():
     logger.info("Starting update_live_prices task")
     
     # API key configuration
-    API_KEY = "goldapi-dkoe2nsm5ov8um6-io"  # Replace with your actual API key
+    API_KEY = "goldapi-3sz5nsm7ysgt15-io"  # Replace with your actual API key
     CURRENCY = "INR"  # Indian Rupees
     
     # Initialize prices

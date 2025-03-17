@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>APonnuduraijwellers</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/imgs/theme/favicon.svg' %}">
+    <!-- Template CSS -->
+    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="index.html" class="brand-wrap">
+                <!-- ../static/assets/imgs/theme/logo.svg -->
+                <img src="{% static 'assets/imgs/theme/logo.svg' %}" class="logo" alt="Evara Dashboard">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'dashboard' %}"> <i class="icon material-icons md-home"></i>
+                        <span class="text"  style="color: #fff !important;">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
+                        <span class="text" style="color: #fff !important;">Users</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
+                        <span class="text"  style="color: #fff !important;">Schemes</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_transation' %}"> <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text" style="color: #fff !important;">Transactions</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_feeds' %}"> <i class="icon material-icons md-add_box"></i>
+                        <span class="text" style="color: #fff !important;">Show Feeds</span>
+                    </a>
+                </li>
+                {% if request.user.is_super_user %}
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
+                        <span class="text" style="color: #fff !important;">Admin Users</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'about_us' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">About Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'contact' %}"> <i class="icon material-icons md-contact_mail "></i>
+                        <span class="text" style="color: #fff !important;">Contact Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'privacy_policy' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">Privacy Policy</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a class="menu-link" href="{% url 'terms_conditions' %}"> <i class="icon material-icons md-privacy_tip"></i>
+                        <span class="text" style="color: #fff !important;">Terms and Conditions</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'logout' %}"> <i class="icon material-icons md-exit_to_app"></i>
+                        <span class="text" style="color: #fff !important;">Logout</span>
+                    </a>
+                </li>
+            </ul>
+            <hr>
+            <br>
+            <br>
+            <div style="text-align: center; color: #fff">© 2025 Powered by <span style="color: #FFD700;">Radbo Designs</span></div>
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-search">
+                <form class="searchform">
+                    <div class="input-group">
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search term">
+                        <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
+                    </div>
+                    <datalist id="search_terms">
+                        <option value="Products">
+                        <option value="New orders">
+                        <option value="Apple iphone">
+                        <option value="Ahmed Hassan">
+                    </datalist>
+                </form>
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="{% static 'assets/imgs/people/avatar2.jpg' %}" alt="User"></a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="#"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </header>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Terms & Conditions</h2>
+                    <p>Please read our terms and conditions carefully</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-5">
+                                <h3 class="mb-4">தமிழில் விதிமுறைகள் மற்றும் நிபந்தனைகள்</h3>
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <ol class="list-group list-group-numbered">
+                                            <li class="list-group-item">எங்களுடைய பொன்னுத்துரை சேமிப்பு திட்டத்தில் நீங்கள் செலுத்தும் தொகை, அன்றைய சந்தை நிலவரத்தின் அடிப்படையில் 916 தங்கம் எடையாக சேமிக்கப்படும்.</li>
+                                            <li class="list-group-item">எங்கள் APP வழியாக பணம் செலுத்தும் போது, ஒரு கிராமிற்கு ரூ.50 வரை தள்ளுபடி வழங்கப்படும்.</li>
+                                            <li class="list-group-item">வருட முடிவில், நீங்கள் சேமித்து வைத்துள்ள மொத்த தங்க எடைக்கு 916 ஹால் மார்க் தங்க நகையை பெறலாம்.</li>
+                                            <li class="list-group-item">இந்த திட்டத்திற்கு மேக்கிங் சார்ஜ் மற்றும் கழிவுகள் பொருந்தாது. இந்த சலுகை சில நகைகளுக்கு பொருந்தாது. சேமிக்கப்பட்ட தொகை எந்த காரணத்திற்காகவும் ரொக்கமாக வழங்கப்படாது.</li>
+                                            <li class="list-group-item">நீங்கள் வாங்கும் நகைக்கு 3% GST பொருந்தும்</li>
+                                            <li class="list-group-item">இந்த சேமிப்பு திட்டத்தை முடிக்கும்போது, பதிவு செய்யப்பட்ட மொபைல் எண்ணுக்கு அனுப்பப்படும் OTP மூலம் மட்டுமே கணக்கு முடிக்கப்படும்.</li>
+                                        </ol>
+                                        <p class="mt-3">விதிமுறைகள் மற்றும் நிபந்தனைகள் நிர்வாகத்திற்கு உட்பட்டது</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="mb-4">Terms & Conditions</h3>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <ol class="list-group list-group-numbered">
+                                            <li class="list-group-item">The amount you contribute to our daily savings plan will be recorded as 916 gold weight based on the market rate of that day.</li>
+                                            <li class="list-group-item">Get a discount of ₹50 per gram on payments made through our APP.</li>
+                                            <li class="list-group-item">At the end of the year, you can redeem 916 Hallmark gold jewelry equivalent to the total gold weight you have saved.</li>
+                                            <li class="list-group-item">No making charges or wastage will be applied under this scheme. This offer is not valid on selected jewelry items. Savings cannot be refunded as cash under any circumstances.</li>
+                                            <li class="list-group-item">A 3% GST will be applicable on the jewelry you purchase.</li>
+                                            <li class="list-group-item">The account can only be closed using the OTP sent to your registered mobile number at the time of completing this savings plan.</li>
+                                        </ol>
+                                        <p class="mt-3">Terms & Conditions are subject to administration</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-5">
+                                <div class="d-flex">
+                                    <i class="material-icons md-info me-2 fs-4"></i>
+                                    <div>
+                                        <h5 class="alert-heading">Important Notice</h5>
+                                        <p class="mb-0">By participating in our gold savings scheme, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions. A.Ponnudurai Jewellers reserves the right to modify these terms and conditions at any time without prior notice.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </section> <!-- content-main end// -->
+        <footer class="main-footer font-xs">
+            <div class="row pb-30 pt-15">
+                <div class="col-sm-6">
+                    <script>
+                    document.write(new Date().getFullYear())
+                    </script> ©, A.Ponnudurai Jewellers.
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-sm-end">
+                        All rights reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <script src="{% static 'assets/js/vendors/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery.fullscreen.min.js' %}"></script>
+    <!-- Main Script -->
+    <script src="{% static 'assets/js/main.js' %}" type="text/javascript"></script>
+</body>
+
+</html>

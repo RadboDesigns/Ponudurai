@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Ponnudurai Dashboard</title>
+    <title>APonnuduraijwellers</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +37,11 @@
                         <span class="text"  style="color: #fff !important;">Dashboard</span>
                     </a>
                 </li>
+                <li class="menu-item active">
+                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
+                        <span class="text" style="color: #fff !important;">Users</span>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text"  style="color: #fff !important;">Schemes</span>
@@ -52,11 +57,6 @@
                         <span class="text" style="color: #fff !important;">Show Feeds</span>
                     </a>
                 </li>
-                <li class="menu-item active">
-                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
-                        <span class="text" style="color: #fff !important;">Users</span>
-                    </a>
-                </li>
                 {% if request.user.is_super_user %}
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
@@ -64,6 +64,26 @@
                     </a>
                 </li>
                 {% endif %}
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'about_us' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">About Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'contact' %}"> <i class="icon material-icons md-contact_mail "></i>
+                        <span class="text" style="color: #fff !important;">Contact Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'privacy_policy' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">Privacy Policy</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'terms_conditions' %}"> <i class="icon material-icons md-privacy_tip"></i>
+                        <span class="text" style="color: #fff !important;">Terms and Conditions</span>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'logout' %}"> <i class="icon material-icons md-exit_to_app"></i>
                         <span class="text" style="color: #fff !important;">Logout</span>
@@ -96,12 +116,6 @@
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
-                            <i class="material-icons md-notifications animation-shake"></i>
-                            <span class="badge rounded-pill">3</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                     </li>
                     <li class="dropdown nav-item">
@@ -128,13 +142,18 @@
             </div>
             <div class="card mb-4">
                 <header class="card-header">
-                    <div class="row gx-3">
-                        <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control">
-                        </div>
-                        
+                    <div class="col-lg-4 col-md-6 me-auto">
+                        <input type="text" placeholder="Search by name..." class="form-control" id="search-input">
                     </div>
-                </header> <!-- card-header end// -->
+                    <div class="col-lg-3 col-md-6">
+                        <input type="text" placeholder="Search by phone..." class="form-control" id="phone-input">
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <button class="btn btn-primary" id="search-button">
+                            <i class="material-icons md-search"></i> Search
+                        </button>
+                    </div>
+                </header>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -144,7 +163,6 @@
                                     <th>Phone Number</th>
                                     <th>Status</th>
                                     <th>Registered</th>
-                                    <th class="text-end"> Action </th>
                                 </tr>
                             </thead>
                             {% for user in users %}
@@ -164,9 +182,6 @@
                                     <td>{{ user.phone_number }}</td>
                                     <td><span class="badge rounded-pill alert-success">Active</span></td>
                                     <td>08.07.2022</td>
-                                    <td class="text-end">
-                                        <a href="#" class="btn btn-sm btn-brand rounded font-sm mt-15">View details</a>
-                                    </td>
                                 </tr>
                                 
                             </tbody>
@@ -198,6 +213,65 @@
     <script src="../static/assets/js/vendors/jquery.fullscreen.min.js"></script>
     <!-- Main Script -->
     <script src="../static/assets/js/main.js" type="text/javascript"></script>
+    <script>
+        // Add this to your main.js file
+// This script specifically targets the card-header search inputs
+document.addEventListener('DOMContentLoaded', function() {
+    // Get references to the dedicated search inputs
+    const nameInput = document.getElementById('search-input');
+    const phoneInput = document.getElementById('phone-input');
+    const searchButton = document.getElementById('search-button');
+    
+    // Only proceed if we find our search elements
+    if (nameInput && phoneInput && searchButton) {
+        console.log("Filter elements found");
+        
+        // Add event listeners
+        nameInput.addEventListener('input', filterTable);
+        phoneInput.addEventListener('input', filterTable);
+        searchButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            filterTable();
+        });
+        
+        // Function to filter the table based on both inputs
+        function filterTable() {
+            const nameValue = nameInput.value.toLowerCase().trim();
+            const phoneValue = phoneInput.value.toLowerCase().trim();
+            
+            // Get all table rows
+            const tableRows = document.querySelectorAll('table.table-hover tbody tr');
+            console.log("Found", tableRows.length, "rows to filter");
+            
+            tableRows.forEach(row => {
+                // Get the username and phone from this row
+                const nameElement = row.querySelector('.info .title');
+                const phoneElement = row.querySelector('td:nth-child(2)');
+                
+                if (nameElement && phoneElement) {
+                    const userName = nameElement.textContent.toLowerCase();
+                    const phoneNumber = phoneElement.textContent.toLowerCase();
+                    
+                    // Row should be displayed if it matches both filters
+                    // (or if a filter is empty, it matches everything)
+                    const nameMatch = nameValue === '' || userName.includes(nameValue);
+                    const phoneMatch = phoneValue === '' || phoneNumber.includes(phoneValue);
+                    
+                    // Show/hide based on both conditions
+                    if (nameMatch && phoneMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+    } else {
+        console.error("Could not find one or more filter elements");
+    }
+});
+    </script>
 </body>
+
 
 </html>

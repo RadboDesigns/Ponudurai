@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Ponnudurai Dashboard</title>
+    <title>APonnuduraijwellers</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,6 +38,11 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
+                        <span class="text" style="color: #fff !important;">Users</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a class="menu-link" href="{% url 'scheme_list' %}"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text"  style="color: #fff !important;">Schemes</span>
                     </a>
@@ -52,11 +57,6 @@
                         <span class="text" style="color: #fff !important;">Show Feeds</span>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{% url 'show_users' %}"> <i class="icon material-icons md-store"></i>
-                        <span class="text" style="color: #fff !important;">Users</span>
-                    </a>
-                </li>
                 {% if request.user.is_super_user %}
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'admin_user_management' %}"> <i class="icon material-icons md-people"></i>
@@ -64,6 +64,26 @@
                     </a>
                 </li>
                 {% endif %}
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'about_us' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">About Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'contact' %}"> <i class="icon material-icons md-contact_mail "></i>
+                        <span class="text" style="color: #fff !important;">Contact Us</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'privacy_policy' %}"> <i class="icon material-icons md-policy"></i>
+                        <span class="text" style="color: #fff !important;">Privacy Policy</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'terms_conditions' %}"> <i class="icon material-icons md-privacy_tip"></i>
+                        <span class="text" style="color: #fff !important;">Terms and Conditions</span>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a class="menu-link" href="{% url 'logout' %}"> <i class="icon material-icons md-exit_to_app"></i>
                         <span class="text" style="color: #fff !important;">Logout</span>
@@ -95,12 +115,6 @@
             <div class="col-nav">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
                 <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
-                            <i class="material-icons md-notifications animation-shake"></i>
-                            <span class="badge rounded-pill">3</span>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                     </li>
@@ -141,7 +155,7 @@
                             <div class="text">
                                 <h6 class="mb-1 card-title">Gold Price</h6>
                                 {% if latest_prices %}
-                                    <span>${{ latest_prices.gold_price|floatformat:2 }}</span>
+                                    <span>₹{{ latest_prices.gold_price|floatformat:2 }}</span>
                                     <span class="text-sm">
                                         Last updated: {{ latest_prices.timestamp|date:"d M Y H:i" }}
                                     </span>
@@ -159,7 +173,7 @@
                             <div class="text">
                                 <h6 class="mb-1 card-title">Silver Price</h6> 
                                 {% if latest_prices %}
-                                    <span>${{ latest_prices.silver_price|floatformat:2 }}</span>
+                                    <span>₹{{ latest_prices.silver_price|floatformat:2 }}</span>
                                     <span class="text-sm">
                                         Last updated: {{ latest_prices.timestamp|date:"d M Y H:i" }}
                                     </span>
@@ -189,7 +203,7 @@
                         <article class="icontext">
                             <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
                             <div class="text">
-                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span>$6,982</span>
+                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span>₹-----</span>
                                 <span class="text-sm">
                                     Based in your local time.
                                 </span>
@@ -389,15 +403,14 @@
     });
 
     // Handle form submission
+    // In your JavaScript for the form submission
     updatePriceForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const formData = new FormData(updatePriceForm);
-        const goldPrice = formData.get('gold_price');
-        const silverPrice = formData.get('silver_price');
-
+        
         try {
-            const response = await fetch('{% url "update_live_price" %}', {
+            const response = await fetch('{% url "update_live_price_manual" %}', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',
