@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>{% block title %}aponnuduraijewellers{% endblock %}</title>
+  <meta name="author" content="aponnuduraijewellers">
+  <meta name="description" content="Luxrio - The Fashion & Watch E-Commerce HTML5 Template">
+  <meta name="keywords" content="Luxrio - The Fashion & Watch E-Commerce HTML5 Template">
+  <meta name="robots" content="INDEX,FOLLOW">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="{% static 'assets/website/favicons/apple-icon-57x57.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/website/favicons/favicon-32x32.png' %}">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&amp;family=Italiana&amp;family=Montserrat:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/magnific-popup.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/slick.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animate.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="vs-body2">
+  {% include 'header.html' %}
+
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'footer.html' %}
+
+  <!-- JS Files -->
+  <script src="{% static 'assets/js/vendors/jquery-3.6.0.min.js' %}"></script>
+  <script src="{% static 'assets/js/jquery-ui.min.js' %}"></script>
+  <script src="{% static 'assets/js/slick.min.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'assets/js/wow.min.js' %}"></script>
+  <script src="{% static 'assets/js/jquery.magnific-popup.min.js' %}"></script>
+  <script src="{% static 'assets/js/imagesloaded.pkgd.min.js' %}"></script>
+  <script src="{% static 'assets/js/gsap.min.js' %}"></script>
+  <script src="{% static 'assets/js/ScrollTrigger.min.js' %}"></script>
+  <script src="{% static 'assets/js/ScrollToPlugin.min.js' %}"></script>
+  <script src="{% static 'assets/js/SplitText.min.js' %}"></script>
+  <script src="{% static 'assets/js/bundled-lenis.min.js' %}"></script>
+  <script src="{% static 'assets/js/main.js' %}"></script>
+  
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

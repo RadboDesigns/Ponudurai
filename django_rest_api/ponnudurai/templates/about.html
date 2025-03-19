@@ -1,0 +1,157 @@
+{% extends 'webSame.html' %}
+{% load static %}
+
+{% block title %}About Us - A.Ponnudurai Jewellers{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Section -->
+<div class="breadcumb-wrapper" data-bg-src="{% static 'assets/website/bg/breadcumb-bg-2.jpg' %}" data-scroll>
+  <img src="{% static 'assets/website/shapes/dot-shape.svg' %}" alt="dot" class="breadcumb-element">
+  <div class="container z-index-common">
+    <div class="breadcumb-content">
+      <h1 class="breadcumb-title">About Us</h1>
+      <div class="breadcumb-menu-wrap">
+        <ul class="breadcumb-menu">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li>About Us</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- About Us Section -->
+<section class="space-extra-bottom space-top z-index-common aboutpage-layout1">
+  <img class="abele1" src="{% static 'assets/website/shapes/aboutpage-ele1.png' %}" alt="about page element">
+  <img class="abele2" src="{% static 'assets/website/shapes/aboutpage-ele2.png' %}" alt="about page element">
+  <div class="extra-shape"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-30 wow animate__fadeInUp" data-wow-delay="0.2s">
+        <div class="title-area mb-4">
+          <span class="sec-subtitle">about us</span>
+          <h2 class="sec-title text-white">A.Ponnudurai Jewellers</h2>
+          <img src="{% static 'assets/website/shapes/title-shape-1.svg' %}" alt="title shape">
+          <p class="sec-text pt-20">Operating since the last 50 years, we are one of the top class leading Textile and jewellery in Southern Tamilnadu. Our products meets high quality standard authorised by BIS-hallmark. We have huge varieties of traditional designs and styles perfectly designed for special occasions.</p>
+        </div>
+        <div class="row gy-4">
+          <div class="col-lg-auto col-md-6">
+            <div class="icon-box">
+              <img class="icon-box__media" src="{% static 'assets/website/icons/vs-about-icon-1.svg' %}" alt="vs-about-icon-1">
+              <h4 class="icon-box__title">Traditional Jewellery</h4>
+              <p class="sec-text">Our collection seamlessly blends classic designs with modern aesthetics.</p>
+            </div>
+          </div>
+          <div class="col-lg-auto col-md-6">
+            <div class="icon-box">
+              <img class="icon-box__media" src="{% static 'assets/website/icons/vs-about-icon-2.svg' %}" alt="vs-about-icon-1">
+              <h4 class="icon-box__title">BIS Hallmark Quality</h4>
+              <p class="sec-text">All our pieces are BIS Hallmark certified, assuring authenticity and purity.</p>
+            </div>
+          </div>
+        </div>
+        <hr class="about-divider">
+        <div class="row gy-4">
+          <div class="col-lg-auto col-md-6">
+            <a href="{% url 'contact' %}" class="vs-btn style4" tabindex="0">Contact Us</a>
+          </div>
+          <div class="col-lg-auto col-md-6">
+            <div class="call-box">
+              <div class="call-box__list">
+                <a href="#">
+                  <img src="{% static 'assets/website/author/about-auth-1-1.jpg' %}" alt="about author">
+                </a>
+                <a href="#">
+                  <i class="fa-solid fa-headphones"></i>
+                </a>
+              </div>
+              <div class="call-box__content">
+                <h4 class="call-box__title">call for us</h4>
+                <a class="call-box__subtitle" href="tel:+1444888966">+1 444 888 966</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 mb-30 wow animate__fadeInUp" data-wow-delay="0.3s">
+        <div class="img-box4">
+          <img src="{% static 'assets/website/about/about-1-1.jpg' %}" alt="about us" class="img-box4__img1">
+          <img src="{% static 'assets/website/about/about-1-2.svg' %}" alt="about us" class="img-box4__img2">
+          <span class="img-box4__shape"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="space-bottom">
+  <div class="container">
+    <div class="title-area text-center mb-5">
+      <span class="sec-subtitle">Why Choose Us</span>
+      <h2 class="sec-title text-white">Our Specialties</h2>
+      <img src="{% static 'assets/website/shapes/title-shape-1.svg' %}" alt="title shape">
+    </div>
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.2s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-gem"></i>
+          </div>
+          <h3 class="feature-card__title text-white">Wide Range of Designs</h3>
+          <p class="feature-card__text sec-text">Explore a plethora of designs at A.Ponnudurai Jewellers. From intricate motifs to contemporary styles, our diverse collection caters to every taste and occasion.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.3s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <h3 class="feature-card__title text-white">Low Waste</h3>
+          <p class="feature-card__text sec-text">We prioritize sustainability by minimizing waste in our production processes, ensuring that every piece of jewellery is crafted with utmost efficiency and care for the environment.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.4s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <h3 class="feature-card__title text-white">Trendy Collections</h3>
+          <p class="feature-card__text sec-text">Stay ahead of the fashion curve with our trendy collections. Our team of designers keeps a keen eye on the latest trends, curating jewellery pieces that are not only fashionable but also timeless.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.5s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <h3 class="feature-card__title text-white">Gold Purchase Scheme</h3>
+          <p class="feature-card__text sec-text">Planning to invest in gold? Our gold purchase scheme offers a convenient and secure way to accumulate gold over time, helping you achieve your financial goals with ease.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.6s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <h3 class="feature-card__title text-white">One-Stop Destination</h3>
+          <p class="feature-card__text sec-text">Whether you're in search of gold, silver, diamond jewellery, or exquisite vessels, A.Ponnudurai Jewellers is your one-stop destination. Explore our comprehensive range of jewellery.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 wow animate__fadeInUp" data-wow-delay="0.7s">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <i class="fa-solid fa-handshake"></i>
+          </div>
+          <h3 class="feature-card__title text-white">Custom Designs</h3>
+          <p class="feature-card__text sec-text">We tailor our range of jewellery as per our client's desire and specifications. We handcraft our jewellery in a wide array of options with respect to colour, designs and materials.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5 wow animate__fadeInUp" data-wow-delay="0.8s">
+      <p class="mb-4 sec-text">At A.Ponnudurai Jewellers, we believe in crafting more than just jewellery; we create memories that last a lifetime. Experience the joy of wearing the best jewellery - visit us today and discover the essence of elegance and craftsmanship redefined.</p>
+      <a href="{% url 'contact' %}" class="vs-btn style4">Visit Our Store</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

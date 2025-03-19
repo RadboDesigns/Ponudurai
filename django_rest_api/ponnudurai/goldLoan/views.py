@@ -47,7 +47,7 @@ def process_cash_payment(request):
             latest_prices = LivePrice.objects.first()
             gold_price = latest_prices.gold_price
         except Exception as e:
-            gold_price = 8000  # Fallback value if gold price is not available
+            gold_price = 8010  # Fallback value if gold price is not available
 
         # Calculate gold added based on the cash payment amount and round to 4 decimal places
         amount_paid = scheme.payAmount

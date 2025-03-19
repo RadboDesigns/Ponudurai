@@ -1,0 +1,65 @@
+{% load static %}
+<!-- Footer Section -->
+<footer class="footer-layout2" data-bg-src="{% static 'assets/website/footer/footer-image-1-1.png' %}" style="background-color: #000;">
+    <div class="footer-widgets">
+      <div class="container">
+        <div class="row gy-4 justify-content-between">
+          <div class="col-lg-3">
+            <div class="footer-logo">
+              <a href="{% url 'home' %}"><img src="{% static 'assets/website/logo.svg' %}" alt="logo"></a>
+            </div>
+            <div class="footer-info style2">
+              <p><span>Address :</span> 966 munich Expressway Sue 700 Germany, TX 7859</p>
+            </div>
+            <a href="#"><img src="{% static 'assets/website/footer/payments.png' %}" alt="payments"></a>
+          </div>
+          <div class="col-lg-auto">
+            <div class="footer-widget">
+              <h3 class="footer-title">Shopping</h3>
+              <div class="footer-menu2">
+                <a href="{% url 'shop' %}">Gift card</a>
+                <a href="{% url 'about' %}">terms & conditions</a>
+                <a href="{% url 'about' %}">privacy policy</a>
+                <a href="{% url 'about' %}">delivery</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-auto">
+            <div class="footer-widget">
+              <h3 class="footer-title">About Store</h3>
+              <div class="footer-menu2">
+                <a href="{% url 'about' %}">Shopping</a>
+                <a href="#">Order Cart</a>
+                <a href="{% url 'about' %}">Privacy Policy</a>
+                <a href="{% url 'about' %}">Help</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-auto">
+            <div class="footer-widget">
+              <h3 class="footer-title">Subscribe for <span>newsletter</span></h3>
+              <form class="footer-newsletter" action="#">
+                <input type="email" placeholder="Enter your email">
+                <button type="submit">
+                  <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+                    <path d="M12.43 0.930176L18.5 7.00018L12.43 13.0702M1.5 7.00018H18.33" stroke="#F5F1E6" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </form>
+              <h4 class="footer-title">follow</h4>
+              <div class="social-style">
+                <a class="facebook" href="https://www.facebook.com/"><i class="fab fa-facebook-f"></i></a>
+                <a class="instagram" href="https://www.instagram.com/"><i class="fab fa-instagram"></i></a>
+                <a class="twitter" href="https://twitter.com/"><i class="fab fa-twitter"></i></a>
+                <a class="linkedin" href="https://linkedin.com/"><i class="fab fa-linkedin-in"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="footer-copyright style2">
+      Copyright <i class="fal fa-copyright"></i> 2024 <a href="{% url 'home' %}">Luxrio</a>.
+      All rights reserved by <a href="https://themeforest.net/user/vecuro_themes">Vecuro</a>.
+    </p>
+  </footer>

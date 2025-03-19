@@ -44,9 +44,11 @@ INSTALLED_APPS = [
     
     'api',
     'goldLoan',
+    'ponnuwebsite',
     'rest_framework',
     'corsheaders',
     'django_celery_results',
+
 ]
 
 MIDDLEWARE = [

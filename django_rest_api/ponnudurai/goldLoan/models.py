@@ -98,6 +98,7 @@ class JoinScheme(models.Model):
         # Set initial number of payments based on package
         is_new = not self.pk  # Check if this is a new instance
         
+        
         if is_new:
             if self.chosenPackage == 'Daily':
                 self.remainingPayments = 365
@@ -161,6 +162,7 @@ class Payment(models.Model):
             scheme.totalAmountPaid += self.amountPaid
             scheme.NumberOfTimesPaid += 1
             scheme.remainingPayments = max(0, scheme.remainingPayments - 1)
+            scheme.totalGold += self.goldAdded
             scheme.save()
 
     def __str__(self):
