@@ -234,6 +234,9 @@
                     <li>
                       <a href="{% url 'contact' %}">Contact</a>
                     </li>
+                    <li>
+                      <a href="{% url 'products' %}">Products</a>
+                    </li>
                     
                   </ul>
                 </nav>
@@ -251,11 +254,12 @@
                       <li>
                         <a href="{% url 'terms_and_condition' %}">Terms and Conditions</a>
                       </li>
-                      <li>
-                        <a href="{% url 'products' %}">Products</a>
-                      </li>
+                      
                       <li>
                         <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
+                      </li>
+                      <li>
+                        <a href="{% url 'login' %}">Login</a>
                       </li>
                       
                       
@@ -584,10 +588,13 @@
         <div class="tab-style1">
           <ul class="nav nav-pills" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">CLASSIC</button>
+              <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Necklace</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Modern</button>
+              <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-eargins" type="button" role="tab" aria-controls="pills-eargins" aria-selected="false">Earrings</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Bracelets</button>
             </li>
           </ul>
           <div class="tab-content" id="pills-tabContent">
@@ -702,6 +709,11 @@
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade show active" id="pills-eargins" role="tabpanel" aria-labelledby="pills-eargins-tab" tabindex="0">
+              <div class="row">
                 <div class="col-lg-3 col-md-6 wow animate__fadeInUp" data-wow-delay="0.2s">
                   <div class="product-style2 version2">
                     <div class="product-action">
@@ -718,19 +730,20 @@
                       </button>
                     </div>
                     <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-6.png' %}" alt="product">
+                      <img class="img" src="{% static 'assets/website/products5/product-1-1.png' %}" alt="product">
                     </div>
                     <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
+                      <a href="shop.html">triumph watch</a>
                     </h3>
                     <span class="product-price">
-                  <span class="product-price__number">$745.00</span>
+                  <span class="product-price__number">$755.00</span>
                     <a class="product-cart" href="cart.html">add to cart</a>
                     </span>
                   </div>
                 </div>
                 <div class="col-lg-3 col-md-6 wow animate__fadeInUp" data-wow-delay="0.3s">
                   <div class="product-style2 version2">
+                    <a href="#new" class="product-tag">new</a>
                     <div class="product-action">
                       <button class="product-action__btn">
                         <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -745,13 +758,13 @@
                       </button>
                     </div>
                     <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-7.png' %}" alt="product">
+                      <img class="img" src="{% static 'assets/website/products5/product-1-2.png' %}" alt="product">
                     </div>
                     <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
+                      <a href="shop.html">golden line</a>
                     </h3>
                     <span class="product-price">
-                  <span class="product-price__number">$185.00</span>
+                  <span class="product-price__number">$955.00</span>
                     <a class="product-cart" href="cart.html">add to cart</a>
                     </span>
                   </div>
@@ -772,13 +785,13 @@
                       </button>
                     </div>
                     <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-8.png' %}" alt="product">
+                      <img class="img" src="{% static 'assets/website/products5/product-1-3.png' %}" alt="product">
                     </div>
                     <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
+                      <a href="shop.html">Round Dial semi</a>
                     </h3>
                     <span class="product-price">
-                  <span class="product-price__number">$155.00</span>
+                  <span class="product-price__number">$555.00</span>
                     <a class="product-cart" href="cart.html">add to cart</a>
                     </span>
                   </div>
@@ -799,7 +812,7 @@
                       </button>
                     </div>
                     <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-9.png' %}" alt="product">
+                      <img class="img" src="{% static 'assets/website/products5/product-1-4.png' %}" alt="product">
                     </div>
                     <h3 class="product-title">
                       <a href="shop.html">Black Dial Red</a>
@@ -812,6 +825,7 @@
                 </div>
               </div>
             </div>
+
             <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
               <div class="row">
                 <div class="col-lg-3 col-md-6">
@@ -923,114 +937,6 @@
                     </span>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                  <div class="product-style2 version2">
-                    <div class="product-action">
-                      <button class="product-action__btn">
-                        <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.465 14.6076C9.21 14.6976 8.79 14.6976 8.535 14.6076C6.36 13.8651 1.5 10.7676 1.5 5.51757C1.5 3.20007 3.3675 1.32507 5.67 1.32507C7.035 1.32507 8.2425 1.98507 9 3.00507C9.7575 1.98507 10.9725 1.32507 12.33 1.32507C14.6325 1.32507 16.5 3.20007 16.5 5.51757C16.5 10.7676 11.64 13.8651 9.465 14.6076Z" stroke="#6D747B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </button>
-                      <button class="product-action__btn">
-                        <svg width="19" height="14" viewBox="0 0 19 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18.5273 6.363C17.8445 4.86967 15.1666 0 9.33323 0C3.4999 0 0.822011 4.86967 0.139122 6.363C0.0474519 6.56312 0 6.78066 0 7.00078C0 7.2209 0.0474519 7.43843 0.139122 7.63856C0.822011 9.13033 3.4999 14 9.33323 14C15.1666 14 17.8445 9.13033 18.5273 7.637C18.6188 7.4371 18.6662 7.21984 18.6662 7C18.6662 6.78016 18.6188 6.5629 18.5273 6.363ZM9.33323 12.4444C4.42779 12.4444 2.13879 8.27089 1.55546 7.00856C2.13879 5.72911 4.42779 1.55556 9.33323 1.55556C14.227 1.55556 16.5168 5.71122 17.111 7C16.5168 8.28878 14.227 12.4444 9.33323 12.4444Z" fill="#6D747B" />
-                          <path d="M9.33323 3.11145C8.56408 3.11145 7.8122 3.33953 7.17268 3.76685C6.53315 4.19416 6.0347 4.80152 5.74036 5.51213C5.44602 6.22273 5.36901 7.00465 5.51906 7.75902C5.66912 8.51339 6.0395 9.20633 6.58337 9.7502C7.12724 10.2941 7.82017 10.6645 8.57454 10.8145C9.32891 10.9646 10.1108 10.8875 10.8214 10.5932C11.532 10.2989 12.1394 9.80042 12.5667 9.16089C12.994 8.52137 13.2221 7.76949 13.2221 7.00034C13.2209 5.96932 12.8108 4.98088 12.0817 4.25184C11.3527 3.5228 10.3642 3.11269 9.33323 3.11145ZM9.33323 9.33367C8.87174 9.33367 8.42061 9.19683 8.0369 8.94044C7.65318 8.68405 7.35411 8.31963 7.17751 7.89327C7.0009 7.46691 6.9547 6.99775 7.04473 6.54513C7.13476 6.09251 7.35699 5.67675 7.68331 5.35042C8.00963 5.0241 8.42539 4.80187 8.87802 4.71184C9.33064 4.62181 9.79979 4.66802 10.2262 4.84462C10.6525 5.02122 11.0169 5.32029 11.2733 5.70401C11.5297 6.08772 11.6666 6.53885 11.6666 7.00034C11.6666 7.61918 11.4207 8.21267 10.9831 8.65026C10.5456 9.08784 9.95207 9.33367 9.33323 9.33367Z" fill="#6D747B" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-5.png' %}" alt="product">
-                    </div>
-                    <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
-                    </h3>
-                    <span class="product-price">
-                  <span class="product-price__number">$325.00</span>
-                    <a class="product-cart" href="cart.html">add to cart</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                  <div class="product-style2 version2">
-                    <div class="product-action">
-                      <button class="product-action__btn">
-                        <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.465 14.6076C9.21 14.6976 8.79 14.6976 8.535 14.6076C6.36 13.8651 1.5 10.7676 1.5 5.51757C1.5 3.20007 3.3675 1.32507 5.67 1.32507C7.035 1.32507 8.2425 1.98507 9 3.00507C9.7575 1.98507 10.9725 1.32507 12.33 1.32507C14.6325 1.32507 16.5 3.20007 16.5 5.51757C16.5 10.7676 11.64 13.8651 9.465 14.6076Z" stroke="#6D747B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </button>
-                      <button class="product-action__btn">
-                        <svg width="19" height="14" viewBox="0 0 19 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18.5273 6.363C17.8445 4.86967 15.1666 0 9.33323 0C3.4999 0 0.822011 4.86967 0.139122 6.363C0.0474519 6.56312 0 6.78066 0 7.00078C0 7.2209 0.0474519 7.43843 0.139122 7.63856C0.822011 9.13033 3.4999 14 9.33323 14C15.1666 14 17.8445 9.13033 18.5273 7.637C18.6188 7.4371 18.6662 7.21984 18.6662 7C18.6662 6.78016 18.6188 6.5629 18.5273 6.363ZM9.33323 12.4444C4.42779 12.4444 2.13879 8.27089 1.55546 7.00856C2.13879 5.72911 4.42779 1.55556 9.33323 1.55556C14.227 1.55556 16.5168 5.71122 17.111 7C16.5168 8.28878 14.227 12.4444 9.33323 12.4444Z" fill="#6D747B" />
-                          <path d="M9.33323 3.11145C8.56408 3.11145 7.8122 3.33953 7.17268 3.76685C6.53315 4.19416 6.0347 4.80152 5.74036 5.51213C5.44602 6.22273 5.36901 7.00465 5.51906 7.75902C5.66912 8.51339 6.0395 9.20633 6.58337 9.7502C7.12724 10.2941 7.82017 10.6645 8.57454 10.8145C9.32891 10.9646 10.1108 10.8875 10.8214 10.5932C11.532 10.2989 12.1394 9.80042 12.5667 9.16089C12.994 8.52137 13.2221 7.76949 13.2221 7.00034C13.2209 5.96932 12.8108 4.98088 12.0817 4.25184C11.3527 3.5228 10.3642 3.11269 9.33323 3.11145ZM9.33323 9.33367C8.87174 9.33367 8.42061 9.19683 8.0369 8.94044C7.65318 8.68405 7.35411 8.31963 7.17751 7.89327C7.0009 7.46691 6.9547 6.99775 7.04473 6.54513C7.13476 6.09251 7.35699 5.67675 7.68331 5.35042C8.00963 5.0241 8.42539 4.80187 8.87802 4.71184C9.33064 4.62181 9.79979 4.66802 10.2262 4.84462C10.6525 5.02122 11.0169 5.32029 11.2733 5.70401C11.5297 6.08772 11.6666 6.53885 11.6666 7.00034C11.6666 7.61918 11.4207 8.21267 10.9831 8.65026C10.5456 9.08784 9.95207 9.33367 9.33323 9.33367Z" fill="#6D747B" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-4.png' %}" alt="product">
-                    </div>
-                    <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
-                    </h3>
-                    <span class="product-price">
-                  <span class="product-price__number">$585.00</span>
-                    <a class="product-cart" href="cart.html">add to cart</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                  <div class="product-style2 version2">
-                    <div class="product-action">
-                      <button class="product-action__btn">
-                        <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.465 14.6076C9.21 14.6976 8.79 14.6976 8.535 14.6076C6.36 13.8651 1.5 10.7676 1.5 5.51757C1.5 3.20007 3.3675 1.32507 5.67 1.32507C7.035 1.32507 8.2425 1.98507 9 3.00507C9.7575 1.98507 10.9725 1.32507 12.33 1.32507C14.6325 1.32507 16.5 3.20007 16.5 5.51757C16.5 10.7676 11.64 13.8651 9.465 14.6076Z" stroke="#6D747B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </button>
-                      <button class="product-action__btn">
-                        <svg width="19" height="14" viewBox="0 0 19 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18.5273 6.363C17.8445 4.86967 15.1666 0 9.33323 0C3.4999 0 0.822011 4.86967 0.139122 6.363C0.0474519 6.56312 0 6.78066 0 7.00078C0 7.2209 0.0474519 7.43843 0.139122 7.63856C0.822011 9.13033 3.4999 14 9.33323 14C15.1666 14 17.8445 9.13033 18.5273 7.637C18.6188 7.4371 18.6662 7.21984 18.6662 7C18.6662 6.78016 18.6188 6.5629 18.5273 6.363ZM9.33323 12.4444C4.42779 12.4444 2.13879 8.27089 1.55546 7.00856C2.13879 5.72911 4.42779 1.55556 9.33323 1.55556C14.227 1.55556 16.5168 5.71122 17.111 7C16.5168 8.28878 14.227 12.4444 9.33323 12.4444Z" fill="#6D747B" />
-                          <path d="M9.33323 3.11145C8.56408 3.11145 7.8122 3.33953 7.17268 3.76685C6.53315 4.19416 6.0347 4.80152 5.74036 5.51213C5.44602 6.22273 5.36901 7.00465 5.51906 7.75902C5.66912 8.51339 6.0395 9.20633 6.58337 9.7502C7.12724 10.2941 7.82017 10.6645 8.57454 10.8145C9.32891 10.9646 10.1108 10.8875 10.8214 10.5932C11.532 10.2989 12.1394 9.80042 12.5667 9.16089C12.994 8.52137 13.2221 7.76949 13.2221 7.00034C13.2209 5.96932 12.8108 4.98088 12.0817 4.25184C11.3527 3.5228 10.3642 3.11269 9.33323 3.11145ZM9.33323 9.33367C8.87174 9.33367 8.42061 9.19683 8.0369 8.94044C7.65318 8.68405 7.35411 8.31963 7.17751 7.89327C7.0009 7.46691 6.9547 6.99775 7.04473 6.54513C7.13476 6.09251 7.35699 5.67675 7.68331 5.35042C8.00963 5.0241 8.42539 4.80187 8.87802 4.71184C9.33064 4.62181 9.79979 4.66802 10.2262 4.84462C10.6525 5.02122 11.0169 5.32029 11.2733 5.70401C11.5297 6.08772 11.6666 6.53885 11.6666 7.00034C11.6666 7.61918 11.4207 8.21267 10.9831 8.65026C10.5456 9.08784 9.95207 9.33367 9.33323 9.33367Z" fill="#6D747B" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-3.png' %}" alt="product">
-                    </div>
-                    <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
-                    </h3>
-                    <span class="product-price">
-                  <span class="product-price__number">$155.00</span>
-                    <a class="product-cart" href="cart.html">add to cart</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                  <div class="product-style2 version2">
-                    <div class="product-action">
-                      <button class="product-action__btn">
-                        <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.465 14.6076C9.21 14.6976 8.79 14.6976 8.535 14.6076C6.36 13.8651 1.5 10.7676 1.5 5.51757C1.5 3.20007 3.3675 1.32507 5.67 1.32507C7.035 1.32507 8.2425 1.98507 9 3.00507C9.7575 1.98507 10.9725 1.32507 12.33 1.32507C14.6325 1.32507 16.5 3.20007 16.5 5.51757C16.5 10.7676 11.64 13.8651 9.465 14.6076Z" stroke="#6D747B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </button>
-                      <button class="product-action__btn">
-                        <svg width="19" height="14" viewBox="0 0 19 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18.5273 6.363C17.8445 4.86967 15.1666 0 9.33323 0C3.4999 0 0.822011 4.86967 0.139122 6.363C0.0474519 6.56312 0 6.78066 0 7.00078C0 7.2209 0.0474519 7.43843 0.139122 7.63856C0.822011 9.13033 3.4999 14 9.33323 14C15.1666 14 17.8445 9.13033 18.5273 7.637C18.6188 7.4371 18.6662 7.21984 18.6662 7C18.6662 6.78016 18.6188 6.5629 18.5273 6.363ZM9.33323 12.4444C4.42779 12.4444 2.13879 8.27089 1.55546 7.00856C2.13879 5.72911 4.42779 1.55556 9.33323 1.55556C14.227 1.55556 16.5168 5.71122 17.111 7C16.5168 8.28878 14.227 12.4444 9.33323 12.4444Z" fill="#6D747B" />
-                          <path d="M9.33323 3.11145C8.56408 3.11145 7.8122 3.33953 7.17268 3.76685C6.53315 4.19416 6.0347 4.80152 5.74036 5.51213C5.44602 6.22273 5.36901 7.00465 5.51906 7.75902C5.66912 8.51339 6.0395 9.20633 6.58337 9.7502C7.12724 10.2941 7.82017 10.6645 8.57454 10.8145C9.32891 10.9646 10.1108 10.8875 10.8214 10.5932C11.532 10.2989 12.1394 9.80042 12.5667 9.16089C12.994 8.52137 13.2221 7.76949 13.2221 7.00034C13.2209 5.96932 12.8108 4.98088 12.0817 4.25184C11.3527 3.5228 10.3642 3.11269 9.33323 3.11145ZM9.33323 9.33367C8.87174 9.33367 8.42061 9.19683 8.0369 8.94044C7.65318 8.68405 7.35411 8.31963 7.17751 7.89327C7.0009 7.46691 6.9547 6.99775 7.04473 6.54513C7.13476 6.09251 7.35699 5.67675 7.68331 5.35042C8.00963 5.0241 8.42539 4.80187 8.87802 4.71184C9.33064 4.62181 9.79979 4.66802 10.2262 4.84462C10.6525 5.02122 11.0169 5.32029 11.2733 5.70401C11.5297 6.08772 11.6666 6.53885 11.6666 7.00034C11.6666 7.61918 11.4207 8.21267 10.9831 8.65026C10.5456 9.08784 9.95207 9.33367 9.33323 9.33367Z" fill="#6D747B" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="product-img">
-                      <img class="img" src="{% static 'assets/website/products5/product-1-2.png' %}" alt="product">
-                    </div>
-                    <h3 class="product-title">
-                      <a href="shop.html">Black Dial Red</a>
-                    </h3>
-                    <span class="product-price">
-                  <span class="product-price__number">$915.00</span>
-                    <a class="product-cart" href="cart.html">add to cart</a>
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1043,14 +949,6 @@
       <div class="overlay"></div>
       <div class="img-box6">
         <img src="{% static 'assets/website/deal/deal-img1.jpg' %}" alt="deal" class="img1">
-        <div class="img-content">
-          <div class="img-offer wow animate__fadeInUp" data-wow-delay="0.4s">
-            <span>20%</span>
-            <span>off</span>
-          </div>
-          <h3 class="wow animate__fadeInUp" data-wow-delay="0.5s">limited time</h3>
-          <img src="{% static 'assets/website/deal/deal-img2.svg' %}" alt="deal" class="img2 wow animate__fadeInUp" data-wow-delay="0.6s">
-        </div>
       </div>
       <div class="container">
         <div class="row">
@@ -1166,8 +1064,7 @@
                 <a href="index.html"><img src="{% static 'assets/website/logo.svg' %}" alt="logo"></a>
               </div>
               <div class="footer-info style2">
-                <p><span>Address :</span> 966 munich Expressway
-                  Sue 700 Germany, TX 7859</p>
+                <p><span>Address :</span> 16/7, ST-3 SIVANKOIL KADAITHERU, Then Thirupporai Eral Junction Point Eral Thoothukudi PIN Code: 628801</p>
               </div>
               <a href="cart.html"><img src="{% static 'assets/website/footer/payments.png' %}" alt="payments"></a>
             </div>
@@ -1217,8 +1114,8 @@
         </div>
       </div>
       <p class="footer-copyright style2">
-        <i class="fal fa-copyright"></i> 2025 
-        All rights reserved by <a href="https://radbodesigns.com/">Radbo Designs</a>.
+        Copyright <i class="fal fa-copyright"></i> 2025 <a href="{% url 'home' %}">aponnuduraijewellers</a>.
+      All rights reserved by <a href="https://radbodesigns.com/">Radbo Designs</a>.
       </p>
     </footer>
     <!--==============================

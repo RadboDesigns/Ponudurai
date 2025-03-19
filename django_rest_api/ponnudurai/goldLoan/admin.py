@@ -32,6 +32,10 @@ admin.site.register(User, UserAdmin)
 @admin.register(JoinScheme)
 class JoinSchemeAdmin(admin.ModelAdmin):
     list_display = ('Name', 'schemeCode', 'joiningDate', 'chosenPackage')
+    
+    fields = ('Name', 'phone', 'Address', 'chosenPackage', 'payAmount', 'joiningDate', 'totalAmountPaid', 'totalGold', 'NumberOfTimesPaid', 'remainingPayments')
+    # Add this to make scheme code read-only
+    readonly_fields = ('schemeCode',)
 
 @admin.register(Feeds)
 class feedsAdmin(admin.ModelAdmin):

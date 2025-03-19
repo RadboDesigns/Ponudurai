@@ -28,6 +28,7 @@ from django.utils import timezone
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from .forms import UserForm
+from django.core.paginator import Paginator
 
 client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 User = get_user_model()
@@ -58,6 +59,7 @@ def process_cash_payment(request):
             schemeCode=scheme,
             paymentDate=timezone.now().date(),
             amountPaid=amount_paid,
+            status='success',
             goldAdded=gold_added,  # Add gold equivalent for cash payment (rounded)
             payment_method='cash'  # Set payment method to cash
         )
@@ -510,6 +512,8 @@ def add_users(request):
 
 def show_transation(request):
     payments = Payment.objects.filter(status='success').order_by('-paymentDate', '-id')
+
+    print(f"Number of payments fetched: {payments.count()}")  # Debug statement
 
     # Apply filters based on query parameters
     start_date = request.GET.get('start_date')
